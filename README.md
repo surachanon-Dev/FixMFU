@@ -1,6 +1,52 @@
 # FixMFU
 🛠️ FixMFU (MFU Facility Issue Tracking System)
 
+FixMFU/
+├── docs/                       # 📂 โฟลเดอร์สำหรับเอกสารวิชา Software Project (PM/SA ดูแล)
+│   ├── 01_requirements/        # ไฟล์ Requirement List (Excel/PDF)
+│   ├── 02_project_plan/        # ไฟล์ Project Management Plan
+│   ├── 03_design/              # ไฟล์ System Design, ER-Diagram, UI Mockups
+│   └── 04_testing/             # ไฟล์ Test Case & Test Summary
+│
+├── src/
+│   ├── app/                    # 🚀 Next.js App Router (Pages & Routing)
+│   │   ├── (user)/             # 👤 Route Group: ฝั่งนักศึกษา/บุคลากรแจ้งปัญหา
+│   │   │   ├── report/         # หน้าฟอร์มแจ้งซ่อม (หน้าจอที่ 3)
+│   │   │   ├── ticket/         # หน้าดูรายละเอียดและติดตามสถานะงานของตัวเอง
+│   │   │   └── page.tsx        # หน้า Home ฝั่ง User (My Tickets)
+│   │   │
+│   │   ├── (admin)/            # 🛠️ Route Group: ฝั่งช่างซ่อมบำรุง/ผู้บริหาร
+│   │   │   ├── dashboard/      # หน้าสรุปสถิติ (กราฟตึกไหนพังบ่อย)
+│   │   │   ├── kanban/         # หน้าจัดการตั๋วแจ้งซ่อม (ลากวางเปลี่ยนสถานะ)
+│   │   │   └── settings/       # หน้าจัดการข้อมูล Master Data (เพิ่มตึก, เพิ่มหมวดหมู่)
+│   │   │
+│   │   ├── api/                # ⚙️ Backend API Routes
+│   │   │   ├── notify/         # API สำหรับยิง LINE Notify
+│   │   │   └── webhooks/       # Webhooks อื่นๆ (ถ้ามี)
+│   │   │
+│   │   ├── login/              # 🔑 หน้า Login (ใช้ร่วมกันทั้ง User และ Admin)
+│   │   ├── layout.tsx          # โครงสร้าง Layout หลักของเว็บ
+│   │   └── globals.css         # ไฟล์ CSS หลัก (Tailwind)
+│   │
+│   ├── components/             # 🧩 UI Components ที่ใช้ซ้ำ (ปุ่ม, ฟอร์ม, Navbar)
+│   │   ├── ui/                 # (แนะนำให้เก็บพวก Shadcn UI ไว้ที่นี่)
+│   │   └── shared/             # Components ที่เขียนเองและใช้หลายที่
+│   │
+│   ├── lib/                    # 🛠️ Utility Functions & Config
+│   │   ├── supabase.ts         # ไฟล์ตั้งค่าการเชื่อมต่อ Supabase Client
+│   │   └── utils.ts            # ฟังก์ชันตัวช่วยต่างๆ (เช่น แปลงฟอร์แมตวันที่)
+│   │
+│   └── types/                  # 🏷️ TypeScript Types/Interfaces (ถ้าใช้ TS)
+│       └── database.types.ts   # โครงสร้าง Type ของ Database
+│
+├── public/                     # 🖼️ รูปภาพ Static (Logo มหาลัย, Icon ต่างๆ)
+├── .env.local                  # 🔐 ไฟล์เก็บ API Keys (ห้าม Push ขึ้น GitHub)
+├── .env.example                # 📄 ไฟล์ตัวอย่าง .env ให้เพื่อนในทีมดูว่าต้องใส่อะไรบ้าง
+├── .gitignore                  # 🚫 กำหนดไฟล์ที่ไม่ต้อง Push ขึ้น GitHub (เช่น node_modules)
+├── next.config.mjs             # ตั้งค่า Next.js
+├── tailwind.config.ts          # ตั้งค่า Tailwind CSS
+└── README.md                   # 📖 อธิบายโปรเจกต์ วิธีติดตั้ง และวิธีรัน
+
 FixMFU is a streamlined facility management and issue tracking platform designed specifically for Mae Fah Luang University (MFU). It modernizes the way students and staff report infrastructure problems (e.g., broken AC, plumbing issues) by providing a user-friendly mobile web interface, while offering a Kanban-style dashboard for maintenance staff to efficiently track and resolve tasks.
 
 ✨ Key Features
@@ -87,14 +133,14 @@ Open http://localhost:3000 with your browser to see the result.
 
 This project is developed by a team of 5 members for the Software Project course.
 
-[Name 1] - Project Manager / SA
+[Surachanon Thongkliang 1] - Project Manager / SA
 
-[Name 2] - Frontend Developer (Admin Dashboard)
+[Sirawich Muaksungnoen] - Frontend Developer (Admin Dashboard)
 
-[Name 3] - Frontend Developer (User App)
+[Athikan konsila] - Frontend Developer (User App)
 
-[Name 4] - Backend & Database Developer
+[Athich Kaweekijudom] - Backend & Database Developer
 
-[Name 5] - System Integrator / QA
+[Sirapat Thammapattanakit] - System Integrator / QA
 
 Designed and built with passion at Mae Fah Luang University. 🎓
