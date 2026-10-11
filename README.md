@@ -62,6 +62,12 @@
 
 โครงสร้างข้อมูลและกติกาสถานะอยู่ใน `src/lib/tickets.ts` ส่วนการจัดเก็บข้อมูลตัวอย่างอยู่ใน `src/lib/ticket-store.ts` เมื่อต่อฐานข้อมูลจริงต้องเพิ่มการตรวจสิทธิ์และการบันทึกประวัติฝั่งเซิร์ฟเวอร์
 
+### การทดลอง Bell Toggle ฝั่ง User
+
+หน้า `/user` มีปุ่ม Bell Toggle จาก React Bits ในส่วนการแจ้งเตือน กดเพื่อทดลองเปิด–ปิด พร้อมแอนิเมชันกระดิ่งและสีส้มเมื่อเปิด บันทึกสถานะใน `localStorage` คีย์ `fixmfu-demo-notifications-v1` และแสดงตรงกันในแท็บบน origin เดียวกัน ปุ่มรองรับ Enter/Space มี `aria-pressed` และลดแอนิเมชันตาม `prefers-reduced-motion` ส่วนนี้ยังเป็นตัวอย่าง UI ไม่ได้ส่งการแจ้งเตือนจริงหรือขอสิทธิ์แจ้งเตือนของเบราว์เซอร์
+
+โค้ด TypeScript อยู่ใน `src/components/bell-toggle.tsx` และตัวเชื่อมหน้า User อยู่ใน `src/components/user-notification-toggle.tsx` ใช้ CSS จากตัวอย่างใน `src/components/bell-toggle.css` และแพ็กเกจ `motion` ร่วมกับ Hugeicons ใบอนุญาตใช้ไฟล์ `src/components/react-bits-LICENSE.md` ร่วมกับ Branched Menu
+
 ```text
 FixMFU/
 ├── docs/                       # 📂 โฟลเดอร์สำหรับเอกสารวิชา Software Project (PM/SA ดูแล)
