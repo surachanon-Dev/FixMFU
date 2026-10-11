@@ -3,7 +3,7 @@ import React from 'react';
 export default function ReportIssuePage() {
   return (
     <div className="max-w-md mx-auto p-6 bg-surface rounded-lg shadow-md mt-10">
-      <h1 className="text-2xl font-bold mb-4 text-ink">แจ้งปัญหาอาคารสถานที่</h1>
+      <h1 className="text-2xl font-semibold mb-4 text-ink">แจ้งปัญหาอาคารสถานที่</h1>
       <form className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">เลือกอาคาร</label>
@@ -31,7 +31,7 @@ export default function ReportIssuePage() {
         </div>
         <button 
           type="button" 
-          className="w-full bg-primary text-ink font-bold py-2 rounded hover:bg-primary-hover transition-colors"
+          className="w-full bg-primary text-ink font-semibold py-2 rounded hover:bg-primary-hover transition-colors"
         >
           ส่งเรื่องแจ้งซ่อม
         </button>

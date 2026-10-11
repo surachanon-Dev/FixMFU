@@ -61,7 +61,7 @@ function TicketActions({ ticket }: { ticket: Ticket }) {
   }
 
   return <section className="rounded-xl border border-line bg-surface p-6">
-    <h2 className="mb-2 text-lg font-bold">ดำเนินการเรื่องแจ้ง</h2>
+    <h2 className="mb-2 text-lg font-semibold">ดำเนินการเรื่องแจ้ง</h2>
     <p className="mb-5 text-sm text-muted">หมายเหตุ ผลการแก้ไข และเหตุผลยกเลิกจะแสดงให้ผู้แจ้งเห็น</p>
     {message && <p role={message.error ? "alert" : "status"} className={`mb-4 rounded-lg p-3 text-sm ${message.error ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"}`}>{message.text}</p>}
     {closed ? <p className="rounded-lg bg-background p-4 text-sm text-muted">เรื่องนี้ปิดแล้ว สามารถดูผลและประวัติการดำเนินงานได้ด้านล่าง</p> : <>
@@ -73,7 +73,7 @@ function TicketActions({ ticket }: { ticket: Ticket }) {
         </label>
         {action === "complete" && <div><label className="block text-sm font-medium">รูปผลการแก้ไข<input key={fileKey} type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={reading} onChange={selectPhotos} className="mt-2 block w-full rounded-lg border border-line p-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-ink" /></label><p className="mb-3 mt-2 text-xs text-muted">แนบได้สูงสุด 3 รูป ขนาดรวมไม่เกิน 2 MB · ระบุผลการแก้ไขหรือแนบรูปอย่างน้อยหนึ่งอย่างก่อนปิดงาน</p><AttachmentGallery photos={photos} emptyText="ยังไม่ได้เลือกรูปผลการแก้ไข" /></div>}
         {action === "cancel" && <p className="text-sm text-red-700">เมื่อยืนยัน เรื่องจะถูกยกเลิกและเก็บเหตุผลไว้ในประวัติ</p>}
-        <button type="submit" disabled={reading} className={action === "cancel" ? "rounded-lg bg-red-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50" : buttonClass}>{reading ? "กำลังอ่านรูป…" : action === "note" ? "บันทึกหมายเหตุ" : action === "complete" ? "ยืนยันปิดงาน" : "ยืนยันยกเลิกเรื่อง"}</button>
+        <button type="submit" disabled={reading} className={action === "cancel" ? "rounded-lg bg-red-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50" : buttonClass}>{reading ? "กำลังอ่านรูป…" : action === "note" ? "บันทึกหมายเหตุ" : action === "complete" ? "ยืนยันปิดงาน" : "ยืนยันยกเลิกเรื่อง"}</button>
       </form>
     </>}
   </section>;
@@ -84,8 +84,8 @@ export default function AdminTicketDetail({ id }: { id: string }) {
   if (!tickets) return <LoadingTickets />;
   const ticket = tickets.find(ticket => ticket.id === id);
   return <div className="p-4 sm:p-6 lg:p-8">
-    <Link href="/admin/tickets" className="mb-5 inline-block text-sm font-semibold text-ink hover:underline">← กลับไปจัดการเรื่องแจ้ง</Link>
-    <h1 className="mb-6 text-3xl font-bold">รายละเอียดเรื่องแจ้ง</h1><DemoNotice />
+    <Link href="/admin/tickets" className="mb-5 inline-block text-sm font-medium text-ink hover:underline">← กลับไปจัดการเรื่องแจ้ง</Link>
+    <h1 className="mb-6 text-3xl font-semibold">รายละเอียดเรื่องแจ้ง</h1><DemoNotice />
     {!ticket ? <p role="alert" className="rounded-xl border border-line bg-surface p-8 text-muted">ไม่พบเรื่องแจ้งรหัสนี้ กรุณากลับไปเลือกรายการอีกครั้ง</p> : <div className="grid items-start gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2"><TicketInformation ticket={ticket} showReporter /><TicketHistory ticket={ticket} /></div>
       <TicketActions key={ticket.id} ticket={ticket} />

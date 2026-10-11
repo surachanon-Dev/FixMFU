@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme inline {
+  --font-sans: var(--font-noto-sans-thai), Tahoma, Arial, sans-serif;
+}
+
 @theme {
   --color-background: #F6F2E9;
   --color-surface: #FFFFFF;

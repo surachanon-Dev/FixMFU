@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
+
+const notoSansThai = localFont({
+  src: "./fonts/NotoSansThai-Variable.ttf",
+  variable: "--font-noto-sans-thai",
+  weight: "100 900",
+  style: "normal",
+  display: "swap",
+  fallback: ["Tahoma", "Arial", "sans-serif"],
+});
 
 export const metadata: Metadata = {
   title: "FixMFU - ระบบแจ้งปัญหาอาคารสถานที่",
@@ -13,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body className="bg-background text-ink antialiased min-h-screen flex flex-col">
+      <body className={`${notoSansThai.variable} bg-background font-sans text-ink leading-relaxed antialiased min-h-screen flex flex-col`}>
         {children}
       </body>
     </html>
