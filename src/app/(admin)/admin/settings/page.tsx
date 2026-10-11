@@ -4,7 +4,7 @@ export default function SettingsPage() {
   return (
     <div className="p-6 md:p-8 bg-gray-50 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">ตั้งค่าระบบ (Settings)</h1>
+        <h1 className="text-3xl font-bold text-gray-900">ตั้งค่าระบบ</h1>
         <p className="text-gray-500 mt-2">จัดการข้อมูลพื้นฐาน รายชื่ออาคาร และหมวดหมู่ปัญหา</p>
       </div>
 

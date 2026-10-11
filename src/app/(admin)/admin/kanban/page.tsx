@@ -4,7 +4,7 @@ export default function KanbanBoardPage() {
   return (
     <div className="p-6 md:p-8 bg-gray-50 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">กระดานจัดการงานซ่อม (Kanban)</h1>
+        <h1 className="text-3xl font-bold text-gray-900">กระดานจัดการงานซ่อม</h1>
         <p className="text-gray-500 mt-2">ลากและวางเพื่อเปลี่ยนสถานะงาน หรือคลิกเพื่อดูรายละเอียด</p>
       </div>
 

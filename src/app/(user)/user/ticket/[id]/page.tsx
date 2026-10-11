@@ -12,7 +12,7 @@ export default function TicketDetailPage() {
     <div className="max-w-3xl mx-auto p-6 mt-8">
       {/* ลิงก์กลับหน้าแรก */}
       <Link 
-        href="/" 
+        href="/user" 
         className="text-blue-600 hover:text-blue-800 font-medium hover:underline mb-6 inline-block"
       >
         &larr; กลับไปหน้าประวัติการแจ้งซ่อม

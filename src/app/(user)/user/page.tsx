@@ -35,7 +35,7 @@ export default function UserHomePage() {
           <p className="text-gray-500 mt-1">ติดตามสถานะปัญหาอาคารสถานที่ที่คุณได้แจ้งไว้</p>
         </div>
         <Link 
-          href="/report" 
+          href="/user/report" 
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-colors flex items-center gap-2"
         >
           <span>➕</span> แจ้งปัญหาใหม่
@@ -62,7 +62,7 @@ export default function UserHomePage() {
             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
               <span className="text-sm text-gray-500">📅 {ticket.date}</span>
               <Link 
-                href={`/ticket/${ticket.id}`} 
+                href={`/user/ticket/${ticket.id}`} 
                 className="text-blue-600 hover:text-blue-800 font-medium text-sm underline-offset-4 hover:underline"
               >
                 ดูรายละเอียด &rarr;
