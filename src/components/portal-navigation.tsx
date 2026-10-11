@@ -8,6 +8,7 @@ const menus = {
     { href: "/admin/dashboard", label: "ภาพรวม" },
     { href: "/admin/tickets", label: "จัดการเรื่องแจ้ง" },
     { href: "/admin/reports", label: "รายงานสรุป" },
+    { href: "/admin/settings", label: "ตั้งค่าระบบ" },
   ],
   user: [
     { href: "/user", label: "ประวัติแจ้งซ่อม" },
