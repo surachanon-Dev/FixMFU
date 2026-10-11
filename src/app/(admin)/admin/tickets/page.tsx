@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DemoNotice, LoadingTickets, TicketTable, inputClass } from "../../../../components/tickets";
 import { useTickets } from "../../../../lib/ticket-store";
 import { STATUS_LABELS } from "../../../../lib/tickets";
@@ -9,8 +9,15 @@ import { STATUS_LABELS } from "../../../../lib/tickets";
 function TicketList() {
   const tickets = useTickets();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState(searchParams.get("status") ?? "");
+  const status = searchParams.get("status") ?? "";
+  const setStatus = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set("status", value);
+    else params.delete("status");
+    router.replace(`/admin/tickets${params.size ? `?${params}` : ""}`, { scroll: false });
+  };
   const [building, setBuilding] = useState("");
   const [category, setCategory] = useState("");
   if (!tickets) return <LoadingTickets />;
@@ -32,6 +39,5 @@ function TicketList() {
 }
 
 export default function AdminTicketsPage() {
-  const searchParams = useSearchParams();
-  return <TicketList key={searchParams.toString()} />;
+  return <TicketList />;
 }
