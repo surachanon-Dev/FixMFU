@@ -1,6 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: #F6F2E9;
+  --color-surface: #FFFFFF;
+  --color-primary: #F4A300;
+  --color-ink: #171717;
+  --color-muted: #667085;
+  --color-line: #E4E7EC;
+  --color-primary-hover: color-mix(in srgb, #F4A300 88%, #171717);
+}
+
+@layer base {
+  *, ::before, ::after {
+    border-color: var(--color-line);
+  }
+
+  input, select, textarea {
+    @apply bg-surface text-ink placeholder:text-muted;
+  }
+}
+
 body {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: var(--color-background);
+  color: var(--color-ink);
 }

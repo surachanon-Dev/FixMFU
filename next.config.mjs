@@ -7,7 +7,8 @@ const nextConfig = {
       { source: "/ticket/:id", destination: "/user/ticket/:id", permanent: false },
       { source: "/admin", destination: "/admin/dashboard", permanent: false },
       { source: "/dashboard", destination: "/admin/dashboard", permanent: false },
-      { source: "/kanban", destination: "/admin/kanban", permanent: false },
+      { source: "/kanban", destination: "/admin/tickets", permanent: false },
+      { source: "/admin/kanban", destination: "/admin/tickets", permanent: false },
       { source: "/settings", destination: "/admin/settings", permanent: false },
     ];
   },
