@@ -19,7 +19,7 @@ function getSnapshot(): boolean {
 }
 const getServerSnapshot = () => false;
 
-export default function UserNotificationToggle() {
+export default function UserNotificationToggle({ compact = false }: { compact?: boolean }) {
   const enabled = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [error, setError] = useState("");
   const change = (pressed: boolean) => {
@@ -29,6 +29,8 @@ export default function UserNotificationToggle() {
       setError("");
     } catch { setError("บันทึกการตั้งค่าไม่ได้ เบราว์เซอร์ไม่อนุญาตให้จัดเก็บข้อมูล"); }
   };
+
+  if (compact) return <div className="flex flex-col items-end gap-1.5"><BellToggle label="เปิดหรือปิดการแจ้งเตือน" pressed={enabled} onChange={change} badge={false} size="sm" /><p className="text-[10px] text-muted">ตัวอย่าง · ยังไม่ส่งแจ้งเตือน</p>{error && <p role="alert" className="max-w-48 text-xs text-red-700">{error}</p>}</div>;
 
   return <section aria-labelledby="user-notification-title" className="mb-6 rounded-xl border border-line bg-surface p-5">
     <div className="flex flex-wrap items-center justify-between gap-4">
