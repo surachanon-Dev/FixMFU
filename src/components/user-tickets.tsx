@@ -7,6 +7,7 @@ import { CheckmarkCircle02Icon, Clock01Icon, InformationCircleIcon, Search01Icon
 import { STATUS_LABELS, type Ticket, type TicketStatus } from "../lib/tickets";
 import UserReportStart from "./user-report-start";
 import UserTicketCard from "./user-ticket-card";
+import RubberSegment from "./rubber-segment";
 
 const focusClass = "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary";
 const summaries: { status: TicketStatus; label: string; icon: IconSvgElement; color: string }[] = [
@@ -42,9 +43,14 @@ export function UserTickets({ tickets }: { tickets: Ticket[] }) {
       </div>
     </section>
 
-    <section aria-label="สรุปสถานะเรื่องของฉัน" className="grid gap-3 sm:grid-cols-3 sm:gap-4">{summaries.map(item => <button key={item.status} type="button" aria-pressed={status === item.status} aria-controls="my-ticket-list" aria-label={`${item.label} ${count(item.status)} เรื่อง`} onClick={() => setStatus(status === item.status ? "all" : item.status)} className={`flex items-center justify-between gap-3 rounded-3xl border bg-surface p-5 text-left transition-colors sm:p-6 ${status === item.status ? "border-primary ring-2 ring-primary/10" : "border-line hover:border-primary/50"} ${focusClass}`}>
-      <div><p className="text-sm text-muted">{item.label}</p><p className="mt-1 text-3xl font-semibold tabular-nums">{count(item.status)}<span className="ml-2 text-sm font-normal text-ink">เรื่อง</span></p></div><span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.color}`}><Icon value={item.icon} size={25} /></span>
-    </button>)}</section>
+    <section aria-label="สรุปสถานะเรื่องของฉัน">
+      <RubberSegment variant="cards" columns={3} radius={24} inset={0} trackColor="transparent" thumbColor="var(--color-surface)" allowEmpty value={status} onChange={value => setStatus(value as TicketStatus)} onClear={() => setStatus("all")} ariaLabel="กรองเรื่องแจ้งตามสถานะ" controlsId="my-ticket-list" items={summaries.map(item => ({
+        value: item.status,
+        ariaLabel: `${item.label} ${count(item.status)} เรื่อง`,
+        label: <span className="flex w-full items-center justify-between gap-3"><span><span className="block text-sm text-muted">{item.label}</span><span className="mt-1 block text-3xl font-semibold tabular-nums">{count(item.status)}<span className="ml-2 text-sm font-normal text-ink">เรื่อง</span></span></span><span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.color}`}><Icon value={item.icon} size={25} /></span></span>,
+      }))} />
+      <p className="sr-only">เลือกสถานะเพื่อกรองรายการ กดสถานะเดิมซ้ำเพื่อดูเรื่องทั้งหมด</p>
+    </section>
 
     <section id="my-tickets" className="scroll-mt-44 space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-semibold">เรื่องแจ้งซ่อมของฉัน</h2><p className="mt-1 text-sm text-muted">ติดตามความคืบหน้าและอัปเดตจากผู้ดูแล</p></div><p aria-live="polite" className="rounded-full bg-surface px-3 py-1.5 text-xs text-muted">พบ {filtered.length} จาก {own.length} เรื่อง</p></div>
