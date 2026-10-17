@@ -24,7 +24,7 @@ export default function AdminShell({ children, sessionControls }: { children: Re
     <header className="sticky top-0 z-40 border-b border-line bg-surface text-ink">
       <div className="mx-auto flex h-18 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <Link href="/admin/dashboard" className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-          <span aria-hidden="true">🛠️</span> FixMFU
+          FixMFU
         </Link>
         <div className="flex items-center gap-3">
           {sessionControls}
