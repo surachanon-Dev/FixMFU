@@ -156,14 +156,14 @@
   right: -7px;
   display: grid;
   place-items: center;
-  min-width: 14px;
-  height: 14px;
+  min-width: 18px;
+  height: 18px;
   padding: 0 3px;
   box-sizing: border-box;
-  border-radius: 7px;
+  border-radius: 9px;
   background: var(--bt-badge);
   color: var(--bt-badge-ink);
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
   opacity: 0;

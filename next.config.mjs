@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async redirects() {
     return [
       { source: "/", destination: "/user", permanent: false },

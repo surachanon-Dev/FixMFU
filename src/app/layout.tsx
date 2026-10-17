@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body className={`${notoSansThai.variable} bg-background font-sans text-ink leading-relaxed antialiased min-h-screen flex flex-col`}>
+      <body className={`${notoSansThai.variable} bg-background font-sans text-base text-ink leading-relaxed antialiased min-h-screen flex flex-col`}>
         {children}
       </body>
     </html>

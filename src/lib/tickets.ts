@@ -16,6 +16,7 @@ export interface TicketEvent {
 }
 export interface Ticket {
   id: string;
+  number?: string;
   title: string;
   description: string;
   building: string;
