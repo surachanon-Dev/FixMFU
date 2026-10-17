@@ -23,11 +23,11 @@
 
 ## ขอบเขตปัจจุบัน
 
-หน้า User ฟอร์ม ประวัติ และรายละเอียดใช้ Supabase จริง ฝั่ง Admin อ่านรายการ รายละเอียดพร้อมข้อมูลผู้แจ้ง รูป Dashboard และรายงานสรุปจากฐานข้อมูลเดียวกันแล้ว ไม่ต้องเพิ่ม SQL หลัง 03 สำหรับการอ่าน มีปุ่มอัปเดตข้อมูล และแบ่งหน้าอ่านครบแม้มีมากกว่า 1,000 เรื่อง **การรับเรื่อง หมายเหตุ เปลี่ยนสถานะ ปิดงาน และยกเลิกยังไม่เปิดใช้** ต้องเพิ่ม RPC ที่ตรวจสิทธิ์และบันทึกประวัติจริงก่อน ส่วนหน้าตั้งค่าและกระดิ่งยังเป็น UI ตัวอย่าง
+หน้า User ฟอร์ม ประวัติ และรายละเอียดใช้ Supabase จริง ฝั่ง Admin อ่านรายการ รายละเอียดพร้อมข้อมูลผู้แจ้ง รูป Dashboard และรายงานสรุปจากฐานข้อมูลเดียวกันแล้ว ไม่ต้องเพิ่ม SQL หลัง 03 สำหรับการอ่าน มีปุ่มอัปเดตข้อมูล และแบ่งหน้าอ่านครบแม้มีมากกว่า 1,000 เรื่อง การรับเรื่อง หมายเหตุ ปิดงานพร้อมผล/รูป และยกเลิกเปิดใช้หลังติดตั้ง SQL 04 ตาม [คู่มือ Admin](admin-ticket-actions.md) ส่วนหน้าตั้งค่าและกระดิ่งยังเป็น UI ตัวอย่าง
 
 ## ตรวจสอบ
 
-รัน `node --test tests/auth.test.mjs tests/dashboard.test.mjs tests/report.test.mjs tests/admin-reports.test.mjs`, `npm run lint` และ `npm run build -- --webpack`
+รัน `node --test tests/auth.test.mjs tests/dashboard.test.mjs tests/report.test.mjs tests/admin-reports.test.mjs tests/admin-ticket-actions.test.mjs`, `npm run lint` และ `npm run build -- --webpack`
 
 `supabase/tests/03_submit_reports.test.sql` ใช้เฉพาะฐานข้อมูลแยกสำหรับทดสอบที่จำลอง Storage metadata เท่านั้น **ห้ามนำชุดทดสอบนี้ไปรันใน SQL Editor ของ Supabase จริง** เพราะไม่อัปโหลดไฟล์ผ่าน Storage API ชุดทดสอบครอบคลุม atomic submit, retry, การอ่านข้ามบัญชี, สิทธิ์ Admin, การปลอม owner, anonymous, personal Gmail, password session และห้ามแก้/ลบรูปที่ผูกกับเรื่องแล้ว ข้อมูลจำลอง rollback ทั้งหมด
 

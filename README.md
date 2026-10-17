@@ -37,17 +37,17 @@
 | User | `/user/ticket/[id]` | ติดตามใบแจ้งซ่อม |
 | Admin | `/admin/dashboard` | ภาพรวมระบบ |
 | Admin | `/admin/tickets` | ค้นหาและกรองเรื่องแจ้งทั้งหมด |
-| Admin | `/admin/tickets/[id]` | ดูรายละเอียด ผู้แจ้ง รูป และประวัติจริง (การเปลี่ยนสถานะยังไม่เปิดใช้) |
+| Admin | `/admin/tickets/[id]` | ดูรายละเอียด รับเรื่อง หมายเหตุ ปิดงานพร้อมผล/รูป และยกเลิกพร้อมเหตุผล |
 | Admin | `/admin/reports` | รายงานรายเดือน ประเภทปัญหา และอาคาร |
 | Admin | `/admin/settings` | ตั้งค่าระบบ |
 
 เข้า `/` จะพาไป `/user` และเข้า `/admin` จะพาไป `/admin/dashboard` ส่วน URL เดิม `/report`, `/ticket/[id]`, `/dashboard`, `/kanban`, `/admin/kanban` และ `/settings` จะส่งต่อไปหน้าใหม่ผ่าน `next.config.mjs` ซึ่งเป็นไฟล์ตั้งค่าที่ Next.js ใช้อยู่
 
-ใช้ Supabase Auth ผ่าน Google OAuth ที่ `/login` เฉพาะบัญชี Google มหาวิทยาลัย `@lamduan.mfu.ac.th` พร้อม session ผ่าน cookies และ Proxy ของ Next.js ผู้ที่ยังไม่ล็อกอินหรือไม่มี Google identity ของมหาลัยจะถูกพาไปหน้าเข้าสู่ระบบ บทบาทอ่านจาก `profiles.role` ในฐานข้อมูลฝั่งเซิร์ฟเวอร์ บัญชี User เปิดหน้า Admin ไม่ได้ ผู้ดูแลเข้าได้ทั้งสองพื้นที่และมีปุ่มสลับพื้นที่/ออกจากระบบ ฝั่ง User ส่งเรื่องและรูป อ่านประวัติและรายละเอียดจาก Supabase จริงเฉพาะบัญชีที่ล็อกอิน หลังติดตั้ง SQL 03 ตาม [คู่มือส่งเรื่อง](docs/03_design/report-submission.md) หน้า Admin อ่านรายการ รายละเอียด Dashboard และรายงานจาก Supabase จริง โดยตรวจ role ฝั่งเซิร์ฟเวอร์และ RLS ทุกครั้ง ส่วนการรับเรื่อง/แก้สถานะยังไม่เปิดใช้ และหน้าตั้งค่ายังเป็นตัวอย่าง
+ใช้ Supabase Auth ผ่าน Google OAuth ที่ `/login` เฉพาะบัญชี Google มหาวิทยาลัย `@lamduan.mfu.ac.th` พร้อม session ผ่าน cookies และ Proxy ของ Next.js ผู้ที่ยังไม่ล็อกอินหรือไม่มี Google identity ของมหาลัยจะถูกพาไปหน้าเข้าสู่ระบบ บทบาทอ่านจาก `profiles.role` ในฐานข้อมูลฝั่งเซิร์ฟเวอร์ บัญชี User เปิดหน้า Admin ไม่ได้ ผู้ดูแลเข้าได้ทั้งสองพื้นที่และมีปุ่มสลับพื้นที่/ออกจากระบบ ฝั่ง User ส่งเรื่องและรูป อ่านประวัติและรายละเอียดจาก Supabase จริงเฉพาะบัญชีที่ล็อกอิน หลังติดตั้ง SQL 03 ตาม [คู่มือส่งเรื่อง](docs/03_design/report-submission.md) หน้า Admin อ่านรายการ รายละเอียด Dashboard และรายงานจาก Supabase จริง โดยตรวจ role ฝั่งเซิร์ฟเวอร์และ RLS ทุกครั้ง การรับเรื่อง หมายเหตุ ปิดงาน และยกเลิกบันทึกจริงหลังติดตั้ง SQL 04 ตาม [คู่มือ Admin](docs/03_design/admin-ticket-actions.md) ส่วนหน้าตั้งค่ายังเป็นตัวอย่าง
 
 ตั้งค่า `.env.local` จาก `.env.example` ใช้ Project URL, Publishable key และ `NEXT_PUBLIC_SITE_URL` แล้วเริ่มเซิร์ฟเวอร์ใหม่ ต้องตั้งค่า Google OAuth, เปิด Before User Created hook และรัน `supabase/sql/02_university_google_auth.sql` ตาม [คู่มือ Google มหาวิทยาลัย](docs/03_design/google-university-login.md) ก่อนใช้งานจริง บัญชีมหาลัยใหม่สร้างผ่าน Google อัตโนมัติด้วย role `user` ไม่มีฟอร์มรหัสผ่านในเว็บ
 
-โค้ดเชื่อมต่ออยู่ใน `src/lib/supabase/client.ts`, `server.ts` และ `src/proxy.ts` ตรวจ claims ที่ผ่านการยืนยันก่อนอ่านบทบาท ไม่ใช้ role จากฟอร์มหรือ user metadata เพื่อให้สิทธิ์ และไม่เก็บรหัสผ่านในแอป ต้องตรวจสิทธิ์ซ้ำใน Server Actions/API ที่เพิ่มภายหลัง ไม่พึ่ง layout เพียงอย่างเดียว ทดสอบกฎ Auth, Dashboard และการส่งเรื่องด้วย `node --test tests/auth.test.mjs tests/dashboard.test.mjs tests/report.test.mjs tests/admin-reports.test.mjs`
+โค้ดเชื่อมต่ออยู่ใน `src/lib/supabase/client.ts`, `server.ts` และ `src/proxy.ts` ตรวจ claims ที่ผ่านการยืนยันก่อนอ่านบทบาท ไม่ใช้ role จากฟอร์มหรือ user metadata เพื่อให้สิทธิ์ และไม่เก็บรหัสผ่านในแอป ต้องตรวจสิทธิ์ซ้ำใน Server Actions/API ที่เพิ่มภายหลัง ไม่พึ่ง layout เพียงอย่างเดียว ทดสอบกฎ Auth, Dashboard และการส่งเรื่องด้วย `node --test tests/auth.test.mjs tests/dashboard.test.mjs tests/report.test.mjs tests/admin-reports.test.mjs tests/admin-ticket-actions.test.mjs`
 
 ### การใช้งานฝั่ง Admin
 
@@ -59,14 +59,14 @@
 - การ์ดสถานะ ลิงก์อาคาร และดูทั้งหมดจาก Dashboard เปิดรายการที่กรองด้วย `year`, `month`, `status` และ `building` ตามช่วงที่เลือก ปุ่มล้างตัวกรองคืนรายการทุกช่วง โค้ดสรุปอยู่ใน `src/lib/dashboard.ts` หน้า UI อยู่ใน `src/components/admin-dashboard.tsx` และกราฟ SVG อยู่ใน `src/components/dashboard-charts.tsx` ใช้ Tailwind และ SVG โดยไม่เพิ่มแพ็กเกจกราฟหรือไฟล์ CSS ใหม่
 - บนมือถือแสดงการ์ดสถิติ 2 คอลัมน์และกราฟครบ 12 เดือน พร้อมช่องเลือกเดือนสำหรับการกดด้วยหน้าจอสัมผัส ตรวจชุดทดสอบการคำนวณ ช่วงเดือน เขตเวลาไทย และลิงก์ตัวกรองด้วย `node --test tests/dashboard.test.mjs`
 - จัดการเรื่องแจ้งค้นหาด้วยรหัส หัวข้อ รายละเอียด สถานที่ หรือผู้แจ้ง และกรองตามสถานะ อาคาร และประเภทปัญหา
-- หน้ารายละเอียดแสดงข้อมูลผู้แจ้ง รูปแนบแบบ signed URL และประวัติจริงพร้อมเวลา ยังไม่มีปุ่มรับเรื่อง หมายเหตุ ปิดงาน หรือยกเลิก เพราะต้องเพิ่ม RPC ตรวจสิทธิ์และบันทึกประวัติจริงก่อน ไม่ใช้ปุ่มตัวอย่างที่เปลี่ยนเฉพาะ localStorage
+- หน้ารายละเอียดแสดงข้อมูลผู้แจ้ง รูปแบบ signed URL และประวัติจริง รับเรื่องจาก pending เป็น in_progress ใส่หมายเหตุ ปิดงานเป็น completed พร้อมผลหรือรูป และยกเลิกจาก pending/in_progress พร้อมเหตุผลได้หลังติดตั้ง SQL 04 บันทึกผู้ดำเนินการ/เวลาใน transaction เดียว ป้องกันกดซ้ำและเขียนทับสถานะที่เปลี่ยนไปแล้ว ดู [คู่มือ Admin](docs/03_design/admin-ticket-actions.md)
 - การยกเลิกต้องระบุเหตุผล เรื่องที่เสร็จสิ้นหรือยกเลิกแล้วจะไม่สามารถแก้ไขได้
 - รูปผลการแก้ไขรองรับ JPG, PNG และ WebP สูงสุด 3 รูป ขนาดรวมไม่เกิน 2 MB บันทึกพร้อมผลการแก้ไขเมื่อยืนยันปิดงาน
 - รายงานนับตามเดือนที่แจ้งในเขตเวลาไทย รวมเรื่องยกเลิก และแสดงสถานะปัจจุบันของเรื่อง
 
 ทั้ง User และ Admin อ่านเรื่องจริงจาก Supabase ผ่าน `src/lib/user-reports.ts` ฝั่ง User กรอง reporter_id ของบัญชีที่ล็อกอินเสมอ รวมถึง Admin ที่สลับไปหน้า User ฝั่ง Admin ตรวจ `requireProfile(true)` ก่อนอ่านเรื่องทั้งหมด พร้อมข้อมูลผู้แจ้ง อ่านแบบแบ่งหน้าเพื่อไม่ให้สถิติขาดเมื่อเกินขีดจำกัด API มีปุ่มอัปเดตข้อมูลเมื่อมีเรื่องใหม่ ข้อผิดพลาดไม่ย้อนกลับไปแสดงข้อมูลตัวอย่าง ไม่ต้องเพิ่ม SQL สำหรับการอ่าน Admin เพราะใช้ RLS เดิมจาก SQL 01–03
 
-โครงสร้างข้อมูลอยู่ใน `src/lib/tickets.ts` โค้ด localStorage เดิมใน `src/lib/ticket-store.ts` ไม่ได้ใช้กับหน้ารายการหรือรายละเอียดจริงแล้ว หน้าตั้งค่าระบบและ Bell Toggle ยังเป็น UI ตัวอย่าง การเปลี่ยนสถานะจริงต้องเพิ่ม RPC ฝั่ง Admin ในขั้นถัดไป
+โครงสร้างข้อมูลอยู่ใน `src/lib/tickets.ts` โค้ด localStorage เดิมใน `src/lib/ticket-store.ts` ไม่ได้ใช้กับหน้ารายการหรือรายละเอียดจริงแล้ว หน้าตั้งค่าระบบและ Bell Toggle ยังเป็น UI ตัวอย่าง การเปลี่ยนสถานะจริงใช้ Server Action และ RPC ที่ตรวจสิทธิ์ Admin ซ้ำ พร้อม ledger คำขอใน schema ส่วนตัวหลังติดตั้ง SQL 04
 
 ### การทดลอง Bell Toggle ฝั่ง User
 
@@ -159,7 +159,7 @@ FixMFU/
 
 ## 🚀 วิธีการรันโปรเจกต์ (สำหรับทีม)
 
-สำหรับเริ่มฐานข้อมูล Supabase ให้ทำตาม [คู่มือตั้งค่าทีละขั้น](docs/03_design/supabase-setup.md) ใช้ไฟล์ `supabase/sql/01_initial_schema.sql` กับโปรเจกต์ว่างเพื่อสร้าง 6 ตาราง ข้อมูลอาคาร/หมวดหมู่ตั้งต้น และสิทธิ์ RLS พร้อมชุดทดสอบใน `supabase/tests/01_initial_schema.test.sql` SQL 01 เป็นเฉพาะฐานข้อมูลตั้งต้น จากนั้นติดตั้ง SQL 02 สำหรับ Google มหาลัย และ SQL 03 สำหรับส่งเรื่อง/รูปตาม [คู่มือส่งเรื่อง](docs/03_design/report-submission.md) ส่วน API เปลี่ยนสถานะฝั่ง Admin ยังไม่ได้เชื่อม
+สำหรับเริ่มฐานข้อมูล Supabase ให้ทำตาม [คู่มือตั้งค่าทีละขั้น](docs/03_design/supabase-setup.md) ใช้ไฟล์ `supabase/sql/01_initial_schema.sql` กับโปรเจกต์ว่างเพื่อสร้าง 6 ตาราง ข้อมูลอาคาร/หมวดหมู่ตั้งต้น และสิทธิ์ RLS พร้อมชุดทดสอบใน `supabase/tests/01_initial_schema.test.sql` SQL 01 เป็นเฉพาะฐานข้อมูลตั้งต้น จากนั้นติดตั้ง SQL 02 สำหรับ Google มหาลัย และ SQL 03 สำหรับส่งเรื่อง/รูปตาม [คู่มือส่งเรื่อง](docs/03_design/report-submission.md) จากนั้นติดตั้ง SQL 04 ตาม [คู่มือ Admin](docs/03_design/admin-ticket-actions.md) เพื่อเปิดการรับเรื่อง หมายเหตุ ปิดงาน และยกเลิกจริง
 
 1. ดึงโค้ดล่าสุดจาก GitHub:
 ```bash

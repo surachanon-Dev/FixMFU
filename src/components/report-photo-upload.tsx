@@ -17,7 +17,7 @@ function fileKey(file: File) {
   return `${file.name}:${file.type}:${file.size}:${file.lastModified}`;
 }
 
-export function ReportPhotoUpload({ onReadingChange }: { onReadingChange?: (reading: boolean) => void }) {
+export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = "รูปประกอบปัญหา" }: { onReadingChange?: (reading: boolean) => void; onSelectionChange?: () => void; label?: string }) {
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [error, setError] = useState("");
   const [reading, setReading] = useState(false);
@@ -37,6 +37,7 @@ export function ReportPhotoUpload({ onReadingChange }: { onReadingChange?: (read
     syncFiles(next);
     selectedRef.current = next;
     setPhotos(next);
+    onSelectionChange?.();
   }
 
   function release(photo: PhotoPreview) {
@@ -130,12 +131,12 @@ export function ReportPhotoUpload({ onReadingChange }: { onReadingChange?: (read
   }
 
   return (
-    <section aria-label="รูปประกอบปัญหา" aria-busy={reading} className="space-y-3">
+    <section aria-label={label} aria-busy={reading} className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-medium">รูปประกอบปัญหา <span className="font-normal text-muted">(ไม่บังคับ)</span></h2>
+        <h2 className="text-sm font-medium">{label} <span className="font-normal text-muted">(ไม่บังคับ)</span></h2>
         <span aria-live="polite" className="shrink-0 text-xs text-muted">{photos.length}/{MAX_PHOTOS} รูป</span>
       </div>
-      <input ref={inputRef} type="file" name="photos" accept={IMAGE_TYPES.join(",")} multiple hidden disabled={reading} onChange={selectPhotos} />
+      <input ref={inputRef} type="file" name={photos.length ? "photos" : undefined} accept={IMAGE_TYPES.join(",")} multiple hidden disabled={reading} onChange={selectPhotos} />
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -158,7 +159,7 @@ export function ReportPhotoUpload({ onReadingChange }: { onReadingChange?: (read
               <div className="relative aspect-[4/3] bg-background">
                 {/* Local object URLs provide immediate previews without uploading or image optimization. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url} alt={`รูปประกอบปัญหา ${index + 1}: ${photo.file.name}`} className="h-full w-full object-contain" />
+                <img src={photo.url} alt={`${label} ${index + 1}: ${photo.file.name}`} className="h-full w-full object-contain" />
                 <button type="button" disabled={reading} onClick={() => removePhoto(photo.id)} aria-label={`ลบรูป ${photo.file.name}`} className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/95 text-ink shadow-sm hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50">
                   <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
                 </button>

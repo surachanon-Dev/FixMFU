@@ -24,6 +24,15 @@ function form(withPhoto = false) {
   if (withPhoto) data.append('photos', new Blob(['bytes'], { type: 'image/png' }), 'QA.png');
   return data;
 }
+test('empty optional multipart file placeholders do not count as attachments', () => {
+  for (const name of ['', 'undefined', 'blob']) {
+    const data = form();
+    data.append('photos', new Blob([], {type:'application/octet-stream'}), name);
+    assert.equal(validation.reportFiles(data).length, 0);
+    data.append('photos', new Blob(['image bytes'], {type:'image/png'}), 'real.png');
+    assert.equal(validation.reportFiles(data).length, 1);
+  }
+});
 test('report validation rejects missing fields, forged lookup IDs, oversized input and invalid files', () => {
   assert.equal(validation.validateReport(form()).title, 'แอร์ไม่เย็น');
   for (const [key, value] of [['title', ' '], ['details', 'x'.repeat(5001)], ['location', ''], ['building', 'อาคาร E4'], ['submissionId', '../other']]) {
@@ -46,6 +55,9 @@ test('server decodes actual images, re-encodes to WebP and produces stable IDs f
   assert.equal(first[0].metadata.size_bytes,first[0].bytes.length);
   assert.equal((await sharp(first[0].bytes).metadata()).format,'webp');
   assert.ok(validation.UUID_PATTERN.test(first[0].metadata.id));
+  const repair = await images.prepareReportImages(id,validation.reportFiles(data),'repair');
+  assert.match(repair[0].metadata.object_path,/\/repair\//);
+  assert.notEqual(repair[0].metadata.id,first[0].metadata.id);
   await assert.rejects(images.prepareReportImages(id,validation.reportFiles(form(true))));
   const svg = form(); svg.append('photos',new Blob(['<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'],{type:'image/png'}),'fake.png');
   await assert.rejects(images.prepareReportImages(id,validation.reportFiles(svg)));

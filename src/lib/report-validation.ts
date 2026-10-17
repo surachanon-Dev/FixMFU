@@ -16,9 +16,11 @@ export function validateReport(form: FormData): ReportFields {
 export function reportFiles(form: FormData): File[] {
   const values = form.getAll("photos");
   if (values.some(value => typeof value === "string")) throw new ReportError("ข้อมูลรูปไม่ถูกต้อง กรุณาเลือกรูปใหม่");
-  const files = (values as File[]).filter(file => file.size || file.name);
+  // Empty optional multipart fields can acquire a filename during transport.
+  // Count only files with content, regardless of the placeholder's name or MIME.
+  const files = (values as File[]).filter(file => file.size > 0);
   if (files.length > 3) throw new ReportError("แนบรูปได้สูงสุด 3 รูป");
   if (files.reduce((sum, file) => sum + file.size, 0) > MAX_REPORT_BYTES) throw new ReportError("ขนาดรูปทั้งหมดต้องไม่เกิน 2 MB");
-  if (files.some(file => !file.size || !["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.name.length > 255)) throw new ReportError("กรุณาใช้รูป JPG, PNG หรือ WebP ที่มีชื่อไฟล์ไม่เกิน 255 ตัวอักษร");
+  if (files.some(file => !["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.name.length > 255)) throw new ReportError("กรุณาใช้รูป JPG, PNG หรือ WebP ที่มีชื่อไฟล์ไม่เกิน 255 ตัวอักษร");
   return files;
 }
