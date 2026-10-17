@@ -22,11 +22,11 @@ export default function AdminShell({ children, sessionControls }: { children: Re
 
   return <>
     <header className="sticky top-0 z-40 border-b border-line bg-surface text-ink">
-      <div className="mx-auto flex h-18 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-18 max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/admin/dashboard" className="flex items-center gap-2 text-xl font-semibold tracking-tight">
           FixMFU
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-2 sm:gap-3">
           {sessionControls}
           <span className="hidden rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-ink sm:inline sm:text-sm">สำหรับผู้ดูแลระบบ</span>
           <button type="button" aria-label="เปิดเมนูผู้ดูแลระบบ" aria-haspopup="dialog" aria-controls="admin-mobile-menu" onClick={() => drawerRef.current?.showModal()} className="rounded-lg border border-line p-2 text-ink focus-visible:outline-2 focus-visible:outline-primary lg:hidden">

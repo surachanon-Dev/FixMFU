@@ -23,7 +23,7 @@ export default function PortalNavigation({ portal }: { portal: "admin" | "user" 
       const active = link.href === "/user"
         ? pathname === "/user" || pathname.startsWith("/user/ticket/")
         : pathname === link.href || pathname.startsWith(`${link.href}/`);
-      return <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${active ? "bg-primary text-ink" : "text-muted hover:bg-background hover:text-ink"}`}>{link.label}</Link>;
+      return <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`inline-flex min-h-12 items-center rounded-xl px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${active ? portal === "user" ? "bg-[#211E18] text-surface" : "bg-primary text-ink" : "text-ink hover:bg-background"}`}>{link.label}</Link>;
     })}
   </nav>;
 }

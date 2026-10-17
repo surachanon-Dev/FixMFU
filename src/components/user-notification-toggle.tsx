@@ -30,14 +30,14 @@ export default function UserNotificationToggle({ compact = false }: { compact?: 
     } catch { setError("บันทึกการตั้งค่าไม่ได้ เบราว์เซอร์ไม่อนุญาตให้จัดเก็บข้อมูล"); }
   };
 
-  if (compact) return <div className="flex flex-col items-end gap-1.5"><BellToggle label="เปิดหรือปิดการแจ้งเตือน" pressed={enabled} onChange={change} badge={false} size="sm" /><p className="text-[10px] text-muted">ตัวอย่าง · ยังไม่ส่งแจ้งเตือน</p>{error && <p role="alert" className="max-w-48 text-xs text-red-700">{error}</p>}</div>;
+  if (compact) return <div className="relative inline-flex h-12 shrink-0 items-center" title="บันทึกการตั้งค่าไว้ในเครื่อง · ระบบส่งแจ้งเตือนยังไม่เปิดบริการ"><BellToggle label="เปิดหรือปิดการแจ้งเตือน" pressed={enabled} onChange={change} badge={false} size="md" radius={12} />{error && <p role="alert" className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-line bg-surface p-3 text-xs text-red-700 shadow-sm">{error}</p>}</div>;
 
   return <section aria-labelledby="user-notification-title" className="mb-6 rounded-xl border border-line bg-surface p-5">
     <div className="flex flex-wrap items-center justify-between gap-4">
-      <div><h2 id="user-notification-title" className="font-medium">การแจ้งเตือน</h2><p className="mt-1 text-sm text-muted">ทดลองปุ่มเปิด–ปิดการแจ้งเตือน</p></div>
+      <div><h2 id="user-notification-title" className="font-medium">การแจ้งเตือน</h2><p className="mt-1 text-sm text-muted">ตั้งค่าการแจ้งเตือนในอุปกรณ์นี้</p></div>
       <BellToggle label="เปิดหรือปิดการแจ้งเตือน" pressed={enabled} onChange={change} badge={false} />
     </div>
-    <p className="mt-3 text-xs text-muted">ขณะนี้เป็นตัวอย่าง ยังไม่ส่งการแจ้งเตือนจริง</p>
+    <p className="mt-3 text-xs text-muted">ระบบส่งการแจ้งเตือนยังไม่เปิดบริการ</p>
     {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
   </section>;
 }

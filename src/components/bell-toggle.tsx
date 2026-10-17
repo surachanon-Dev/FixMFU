@@ -41,7 +41,7 @@ interface BellToggleProps {
 
 const SPRING_UI = { type: "spring", duration: 0.3, bounce: 0 } as const;
 const SEG_EASE = "cubic-bezier(0.77, 0, 0.175, 1)";
-const SIZES = { sm: [36, 12.5, 14, 15, 8], md: [44, 13.5, 16, 19, 9], lg: [52, 15, 18, 23, 10] } as const;
+const SIZES = { sm: [40, 14, 16, 15, 8], md: [48, 16, 18, 19, 9], lg: [56, 18, 20, 23, 10] } as const;
 const WOBBLE = { amplitude: 0.4, passes: 3, duration: 420 };
 const BELL_BODY = "M6 16.5V10a6 6 0 0 1 12 0v6.5l1.6 2.3H4.4L6 16.5z";
 const passOffset = (index: number, passes: number) => 1 - Math.pow(1 - (index + 2 / 3) / (passes + 1), 0.6);

@@ -11,7 +11,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return <main className="flex min-h-svh flex-1 items-center justify-center bg-background px-5 py-10 sm:py-14">
     <section aria-labelledby="login-brand" className="flex min-h-[570px] w-full max-w-[460px] flex-col justify-between gap-10 rounded-[2.75rem] border border-white/70 bg-background px-7 py-10 shadow-[16px_16px_45px_#dedad2,-16px_-16px_45px_#ffffff] sm:min-h-[620px] sm:px-11 sm:py-12">
       <header className="text-center">
-        <p className="text-[11px] font-medium tracking-wide text-muted">มหาวิทยาลัยแม่ฟ้าหลวง</p>
+        <p className="text-xs font-medium tracking-wide text-muted">มหาวิทยาลัยแม่ฟ้าหลวง</p>
         <h1 id="login-brand" className="mt-5 text-[58px] font-semibold leading-none tracking-[-0.065em] text-ink sm:text-[66px]">Fix<span className="font-normal">MFU</span></h1>
         <span aria-hidden="true" className="mx-auto mt-5 block h-1 w-7 rounded-full bg-primary" />
       </header>

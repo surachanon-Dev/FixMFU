@@ -8,7 +8,7 @@
   --gs-inner-radius: 6px;
   --gs-chip: 44px;
   --gs-row: 44px;
-  --gs-font: 14px;
+  --gs-font: var(--text-sm);
   --gs-menu-w: 100%;
   --gs-pop: 180ms;
   --gs-pop-out: 120ms;

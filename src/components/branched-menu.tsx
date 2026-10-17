@@ -54,8 +54,8 @@ const toSet = (open: number | number[]) => new Set(Array.isArray(open) ? open : 
 export default function BranchedMenu({
   items, activeValue, defaultOpen = 0, onSelect, onToggle,
   color = "var(--color-ink)", accentColor = "var(--color-primary)", lineColor = "var(--color-line)",
-  width = 240, rowHeight = 40, indent = 38, trunk = 14, radius = 10,
-  lineWidth = 1.5, fontSize = 14, drawDuration = 300, foldDuration = 220, className = "",
+  width = 240, rowHeight = 44, indent = 38, trunk = 14, radius = 10,
+  lineWidth = 1.5, fontSize = 16, drawDuration = 300, foldDuration = 220, className = "",
 }: BranchedMenuProps) {
   const [open, setOpen] = useState(() => toSet(defaultOpen));
   const id = useId();

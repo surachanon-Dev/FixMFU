@@ -19,13 +19,13 @@ export function MonthlyTicketChart({ rows, year, selectedMonth, onSelect }: { ro
   const scale = (value: number) => value / maximum * 176;
   return <>
     <div className="overflow-x-auto pb-1">
-      <svg viewBox="0 0 660 256" className="w-full" role="group" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`}>
+      <svg viewBox="0 0 660 256" className="w-full min-w-[640px]" role="group" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`}>
         <title id={`${id}-title`}>จำนวนเรื่องแจ้งรายเดือน ปี {year + 543}</title><desc id={`${id}-description`}>สีส้มคือเรื่องที่มีสถานะเสร็จสิ้น ลายเส้นคือสถานะอื่น กดเดือนหรือใช้ Enter และ Space เพื่อเลือกช่วงสรุป</desc>
         <defs><pattern id={`${id}-stripe`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" className="fill-primary/10" /><line x1="0" x2="0" y1="0" y2="5" className="stroke-primary/40" strokeWidth="1.5" /></pattern></defs>
         {Array.from({ length: 5 }, (_, index) => {
           const value = maximum / 4 * index;
           const y = baseline - scale(value);
-          return <g key={value} aria-hidden="true"><line x1="36" x2="650" y1={y} y2={y} className="stroke-line" strokeDasharray={index ? "3 5" : undefined} /><text x="24" y={y + 4} textAnchor="end" className="fill-muted text-[18px] sm:text-[11px]">{value}</text></g>;
+          return <g key={value} aria-hidden="true"><line x1="36" x2="650" y1={y} y2={y} className="stroke-line" strokeDasharray={index ? "3 5" : undefined} /><text x="30" y={y + 5} textAnchor="end" className="fill-muted text-sm">{value}</text></g>;
         })}
         {rows.map((row, index) => {
           const x = 43 + index * 51;
@@ -36,7 +36,7 @@ export function MonthlyTicketChart({ rows, year, selectedMonth, onSelect }: { ro
           return <g key={index} role="button" tabIndex={0} aria-label={label} aria-pressed={active} className="group cursor-pointer outline-none" onClick={() => onSelect(index)} onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(index); } }}>
             <title>{label}</title><rect x={x - 4} y={18} width="48" height="223" rx="8" className={active ? "fill-primary/10" : "fill-background opacity-0 group-hover:opacity-100"} /><rect x={x - 4} y={18} width="48" height="223" rx="8" fill="none" className="stroke-primary opacity-0 group-focus-visible:opacity-100" strokeWidth="2" />
             {otherHeight > 0 && <rect x={x} y={baseline - completedHeight - otherHeight} width="39" height={otherHeight} rx="4" fill={`url(#${id}-stripe)`} />}{completedHeight > 0 && <rect x={x} y={baseline - completedHeight} width="39" height={completedHeight} rx="4" className="fill-primary" />}
-            {row.total > 0 && <text x={x + 19.5} y={baseline - scale(row.total) - 8} textAnchor="middle" className="fill-ink text-[22px] font-medium sm:text-[12px]" aria-hidden="true">{row.total}</text>}<text x={x + 19.5} y="233" textAnchor="middle" className={`${active ? "fill-ink font-semibold" : "fill-muted"} text-[18px] sm:text-[11px]`} aria-hidden="true">{MONTH_LABELS[index]}</text>
+            {row.total > 0 && <text x={x + 19.5} y={baseline - scale(row.total) - 8} textAnchor="middle" className="fill-ink text-lg font-medium" aria-hidden="true">{row.total}</text>}<text x={x + 19.5} y="233" textAnchor="middle" className={`${active ? "fill-ink font-semibold" : "fill-muted"} text-sm`} aria-hidden="true">{MONTH_LABELS[index]}</text>
           </g>;
         })}
       </svg>
@@ -57,6 +57,6 @@ export function StatusDonut({ counts, total, rate }: { counts: Record<TicketStat
       offset += length;
       return length ? <circle key={status} cx="64" cy="64" r={radius} fill="none" className={STATUS_STROKES[status]} strokeWidth="11" strokeDasharray={`${length} ${circumference - length}`} strokeDashoffset={-start} transform="rotate(-90 64 64)" /> : null;
     })}
-    <text x="64" y="63" textAnchor="middle" className="fill-ink text-[25px] font-semibold">{rate}%</text><text x="64" y="82" textAnchor="middle" className="fill-muted text-[10px]">เสร็จสิ้น</text>
+    <text x="64" y="63" textAnchor="middle" className="fill-ink text-[28px] font-semibold">{rate}%</text><text x="64" y="82" textAnchor="middle" className="fill-muted text-xs">เสร็จสิ้น</text>
   </svg>;
 }

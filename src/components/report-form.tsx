@@ -11,7 +11,7 @@ import { ReportPhotoUpload } from "./report-photo-upload";
 import type { GlideSelectOption } from "./glide-select";
 import { inputClass } from "./tickets";
 
-export function ReportForm({ submissionId, buildings, categories }: { submissionId: string; buildings: GlideSelectOption[]; categories: GlideSelectOption[] }) {
+export function ReportForm({ submissionId, buildings, categories, initialTitle = "", initialCategory, locationPlaceholder = "เช่น ห้อง E4-301 ชั้น 3" }: { submissionId: string; buildings: GlideSelectOption[]; categories: GlideSelectOption[]; initialTitle?: string; initialCategory?: string; locationPlaceholder?: string }) {
   const router = useRouter();
   const sendingRef = useRef(false);
   const [pending, setPending] = useState(false);
@@ -41,10 +41,10 @@ export function ReportForm({ submissionId, buildings, categories }: { submission
   return <form onSubmit={send} aria-busy={pending} className="space-y-5">
     <input type="hidden" name="submissionId" value={submissionId} />
     <fieldset disabled={pending} className="min-w-0 space-y-5 disabled:opacity-70">
-      <div><label htmlFor="report-title" className="mb-1.5 block text-sm font-medium">หัวข้อปัญหา</label><input id="report-title" name="title" required maxLength={200} placeholder="เช่น แอร์ห้อง E4-301 ไม่เย็น" className={inputClass} /></div>
+      <div><label htmlFor="report-title" className="mb-1.5 block text-sm font-medium">หัวข้อปัญหา</label><input id="report-title" name="title" required maxLength={200} defaultValue={initialTitle} placeholder="เช่น แอร์ห้อง E4-301 ไม่เย็น" className={inputClass} /></div>
       <div><label htmlFor="report-building" className="mb-1.5 block text-sm font-medium">เลือกอาคาร</label><ReportBuildingSelect options={buildings} /></div>
-      <div><label htmlFor="report-location" className="mb-1.5 block text-sm font-medium">ห้องหรือจุดที่พบปัญหา</label><input id="report-location" name="location" required maxLength={300} placeholder="เช่น ห้อง E4-301 ชั้น 3" className={inputClass} /></div>
-      <div><label htmlFor="report-category" className="mb-1.5 block text-sm font-medium">หมวดหมู่ปัญหา</label><ReportCategorySelect options={categories} /></div>
+      <div><label htmlFor="report-location" className="mb-1.5 block text-sm font-medium">ห้องหรือจุดที่พบปัญหา</label><input id="report-location" name="location" required maxLength={300} placeholder={locationPlaceholder} className={inputClass} /></div>
+      <div><label htmlFor="report-category" className="mb-1.5 block text-sm font-medium">หมวดหมู่ปัญหา</label><ReportCategorySelect options={categories} initialValue={initialCategory} /></div>
       <div><label htmlFor="report-details" className="mb-1.5 block text-sm font-medium">รายละเอียด</label><textarea id="report-details" name="details" required maxLength={5000} rows={4} placeholder="อธิบายปัญหาที่พบและช่วงเวลาที่เกิด" className={inputClass} /></div>
       <ReportPhotoUpload onReadingChange={setReading} />
     </fieldset>

@@ -13,13 +13,12 @@ export default async function UserLayout({ children }: Readonly<{ children: Reac
   const profile = await requireProfile();
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-line bg-surface text-ink shadow-sm">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="order-1"><Link href="/user" className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-            FixMFU
-          </Link><p className="mt-1 text-[10px] text-muted">พื้นที่สำหรับผู้ใช้งาน</p></div>
-          <div className="order-3 w-full md:order-2 md:w-auto"><PortalNavigation portal="user" /></div>
-          <div className="order-2 flex flex-wrap items-center justify-end gap-3 md:order-3"><UserNotificationToggle compact /><AuthSessionControls profile={profile} /></div>
+      <header className="sticky top-0 z-50 border-b border-line bg-surface text-ink">
+        <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)] items-center gap-x-6 gap-y-3 px-4 py-4 sm:px-6 lg:flex lg:flex-wrap lg:px-8">
+          <Link href="/user" aria-label="FixMFU หน้าผู้ใช้งาน" className="order-1 shrink-0 text-xl font-semibold tracking-tight">Fix<span className="text-primary">MFU</span></Link>
+          <div className="order-4 col-span-2 w-full lg:order-2 lg:w-auto"><PortalNavigation portal="user" /></div>
+          <div className="order-2 justify-self-end lg:order-3 lg:ml-auto"><UserNotificationToggle compact /></div>
+          <div className="order-3 col-span-2 flex justify-end lg:order-4"><AuthSessionControls profile={profile} userPortal /></div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 pb-8">{children}</main>
