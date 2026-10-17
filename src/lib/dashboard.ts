@@ -2,7 +2,7 @@ import { countBy, ticketMonth, type Ticket, type TicketEvent, type TicketStatus 
 
 export const MONTH_LABELS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 export interface DashboardMonth { month: number; total: number; completed: number }
-export interface DashboardActivity { ticketId: string; title: string; event: TicketEvent }
+export interface DashboardActivity { ticketId: string; ticketNumber: string; title: string; event: TicketEvent }
 
 export function filterTicketsByPeriod(tickets: Ticket[], year = "", month = ""): Ticket[] {
   return tickets.filter(ticket => {
@@ -30,7 +30,7 @@ export function summarizeDashboard(tickets: Ticket[], year: number, month: numbe
   for (const ticket of selected) counts[ticket.status]++;
   const activities: DashboardActivity[] = selected.flatMap(ticket => ticket.history
     .filter(event => event.actor === "ผู้ดูแลระบบ")
-    .map(event => ({ ticketId: ticket.id, title: ticket.title, event })))
+    .map(event => ({ ticketId: ticket.id, ticketNumber: ticket.number ?? ticket.id, title: ticket.title, event })))
     .sort((a, b) => new Date(b.event.at).getTime() - new Date(a.event.at).getTime()).slice(0, 3);
   const queue = selected.filter(ticket => ticket.status === "pending" || ticket.status === "in_progress")
     .sort((a, b) => Number(a.status !== "pending") - Number(b.status !== "pending") || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());

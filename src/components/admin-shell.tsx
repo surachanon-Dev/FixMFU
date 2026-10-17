@@ -10,7 +10,7 @@ function NavigationFallback() {
   return <p role="status" className="px-3 text-sm text-muted">กำลังโหลดเมนู…</p>;
 }
 
-export default function AdminShell({ children }: { children: ReactNode }) {
+export default function AdminShell({ children, sessionControls }: { children: ReactNode; sessionControls?: ReactNode }) {
   const drawerRef = useRef<HTMLDialogElement>(null);
   const closeMenu = () => drawerRef.current?.close();
   useEffect(() => {
@@ -27,7 +27,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           <span aria-hidden="true">🛠️</span> FixMFU
         </Link>
         <div className="flex items-center gap-3">
-          <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-ink sm:text-sm">สำหรับผู้ดูแลระบบ</span>
+          {sessionControls}
+          <span className="hidden rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-ink sm:inline sm:text-sm">สำหรับผู้ดูแลระบบ</span>
           <button type="button" aria-label="เปิดเมนูผู้ดูแลระบบ" aria-haspopup="dialog" aria-controls="admin-mobile-menu" onClick={() => drawerRef.current?.showModal()} className="rounded-lg border border-line p-2 text-ink focus-visible:outline-2 focus-visible:outline-primary lg:hidden">
             <HugeiconsIcon icon={Menu01Icon} size={20} aria-hidden="true" />
           </button>

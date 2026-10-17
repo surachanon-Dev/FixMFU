@@ -15,7 +15,7 @@ export function StatusBadge({ status }: { status: TicketStatus }) {
 }
 
 export function DemoNotice() {
-  return <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">โหมดตัวอย่าง · การเปลี่ยนแปลงแสดงร่วมกันระหว่างหน้าผู้ใช้และผู้ดูแลในเบราว์เซอร์นี้</p>;
+  return <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">โหมดตัวอย่างฝั่งผู้ดูแล · รายการและการเปลี่ยนสถานะส่วนนี้ยังไม่เชื่อมกับเรื่องจริงที่ผู้ใช้ส่ง</p>;
 }
 
 export function LoadingTickets() {
@@ -29,12 +29,12 @@ export function TicketTable({ tickets }: { tickets: Ticket[] }) {
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line bg-surface text-muted"><tr>{["เรื่องแจ้ง", "อาคาร / สถานที่", "ประเภทปัญหา", "สถานะ", "วันที่แจ้ง", "รายละเอียด"].map(label => <th key={label} scope="col" className="whitespace-nowrap px-5 py-4 font-medium">{label}</th>)}</tr></thead>
         <tbody className="divide-y divide-line">{tickets.map(ticket => <tr key={ticket.id} className="hover:bg-primary/10">
-          <td className="min-w-56 px-5 py-4"><span className="text-xs text-muted">{ticket.id}</span><p className="mt-1 font-medium text-ink">{ticket.title}</p></td>
+          <td className="min-w-56 px-5 py-4"><span className="text-xs text-muted">{ticket.number ?? ticket.id}</span><p className="mt-1 font-medium text-ink">{ticket.title}</p></td>
           <td className="min-w-40 px-5 py-4">{ticket.building}<p className="mt-1 text-xs text-muted">{ticket.location}</p></td>
           <td className="whitespace-nowrap px-5 py-4">{ticket.category}</td>
           <td className="px-5 py-4"><StatusBadge status={ticket.status} /></td>
           <td className="whitespace-nowrap px-5 py-4 text-muted">{formatDate(ticket.createdAt)}</td>
-          <td className="whitespace-nowrap px-5 py-4"><Link className="font-medium text-ink hover:underline" href={`/admin/tickets/${ticket.id}`} aria-label={`ดูรายละเอียด ${ticket.id}`}>ดูรายละเอียด →</Link></td>
+          <td className="whitespace-nowrap px-5 py-4"><Link className="font-medium text-ink hover:underline" href={`/admin/tickets/${ticket.id}`} aria-label={`ดูรายละเอียด ${ticket.number ?? ticket.id}`}>ดูรายละเอียด →</Link></td>
         </tr>)}</tbody>
       </table>
     </div>
@@ -43,7 +43,7 @@ export function TicketTable({ tickets }: { tickets: Ticket[] }) {
 
 export function TicketInformation({ ticket, showReporter = false }: { ticket: Ticket; showReporter?: boolean }) {
   return <section className="rounded-xl border border-line bg-surface p-6">
-    <div className="mb-6 flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm text-muted">{ticket.id} · แจ้งเมื่อ {formatDate(ticket.createdAt, true)}</p><h2 className="mt-2 text-xl font-semibold text-ink">{ticket.title}</h2></div><StatusBadge status={ticket.status} /></div>
+    <div className="mb-6 flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm text-muted">{ticket.number ?? ticket.id} · แจ้งเมื่อ {formatDate(ticket.createdAt, true)}</p><h2 className="mt-2 text-xl font-semibold text-ink">{ticket.title}</h2></div><StatusBadge status={ticket.status} /></div>
     <dl className="grid gap-5 sm:grid-cols-2">
       <div><dt className="text-sm text-muted">อาคาร / สถานที่</dt><dd className="mt-1 font-medium">{ticket.building} · {ticket.location}</dd></div>
       <div><dt className="text-sm text-muted">ประเภทปัญหา</dt><dd className="mt-1 font-medium">{ticket.category}</dd></div>
@@ -60,7 +60,7 @@ export function TicketInformation({ ticket, showReporter = false }: { ticket: Ti
 export function AttachmentGallery({ photos, emptyText }: { photos: Ticket["photos"]; emptyText: string }) {
   if (!photos.length) return <p className="text-sm text-muted">{emptyText}</p>;
   return <div className="grid gap-3 sm:grid-cols-2">{photos.map((photo, index) => <figure key={`${photo.name}-${index}`} className="overflow-hidden rounded-lg border border-line bg-surface">
-    {/* User-selected data URLs are validated before saving; they cannot use the image optimizer. */}
+    {/* Private Storage signed URLs and local demo images bypass the image optimizer. */}
     {/* eslint-disable-next-line @next/next/no-img-element */}
     <img src={photo.dataUrl} alt={photo.name} className="h-48 w-full object-contain" />
     <figcaption className="truncate px-3 py-2 text-xs text-muted">{photo.name}</figcaption>

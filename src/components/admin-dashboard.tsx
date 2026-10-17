@@ -4,10 +4,10 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { Analytics01Icon, ArrowRight01Icon, ArrowUpRight01Icon, Building03Icon, Calendar03Icon, CheckmarkCircle02Icon, Clock01Icon, InformationCircleIcon, Task01Icon, ToolsIcon } from "@hugeicons/core-free-icons";
-import { LoadingTickets, TicketTable } from "./tickets";
+import { TicketTable } from "./tickets";
+import { RefreshReports } from "./refresh-reports";
 import { MonthlyTicketChart, SegmentMeter, StatusDonut, STATUS_DOTS } from "./dashboard-charts";
-import { useTickets } from "../lib/ticket-store";
-import { STATUS_LABELS, formatDate, formatMonth, ticketMonth, type TicketStatus } from "../lib/tickets";
+import { STATUS_LABELS, formatDate, formatMonth, ticketMonth, type Ticket, type TicketStatus } from "../lib/tickets";
 import { MONTH_LABELS, dashboardTicketHref, summarizeDashboard } from "../lib/dashboard";
 
 const panelClass = "rounded-2xl border border-line bg-surface p-5 shadow-xs sm:p-6";
@@ -22,10 +22,8 @@ function PanelHeading({ title, action }: { title: string; action?: ReactNode }) 
   return <div className="mb-5 flex items-center justify-between gap-3"><h2 className="text-base font-medium text-ink">{title}</h2>{action}</div>;
 }
 
-export default function AdminDashboard() {
-  const tickets = useTickets();
+export default function AdminDashboard({ tickets }: { tickets: Ticket[] }) {
   const [selection, setSelection] = useState<{ year: number | null; month: number | null }>({ year: null, month: null });
-  if (!tickets) return <LoadingTickets />;
   const currentYear = Number(new Intl.DateTimeFormat("en", { timeZone: "Asia/Bangkok", year: "numeric" }).format(new Date()));
   const years = [...new Set([currentYear, ...tickets.map(ticket => Number(ticketMonth(ticket).slice(0, 4)))])].sort((a, b) => b - a);
   const year = selection.year ?? years[0];
@@ -46,11 +44,12 @@ export default function AdminDashboard() {
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><div className="mb-2 flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-primary" /><p className="text-xs font-medium text-muted">ศูนย์จัดการงานซ่อม</p></div><h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">ภาพรวมระบบ</h1><p className="mt-2 text-sm text-muted">ติดตามเรื่องแจ้งและการดำเนินงานในมุมเดียว</p></div>
       <div className="flex flex-wrap items-center gap-2">
+        <RefreshReports />
         <label className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2.5 text-sm"><Icon value={Calendar03Icon} size={16} /><span className="sr-only">ปีที่แสดง</span><select value={year} onChange={event => setSelection({ year: Number(event.target.value), month: null })} className="cursor-pointer bg-transparent pr-1 text-sm outline-none focus-visible:outline-2 focus-visible:outline-primary">{years.map(value => <option key={value} value={value}>ปี {value + 543}</option>)}</select></label>
         <Link href={href()} className={`inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-ink hover:bg-primary-hover ${focusClass}`}>จัดการเรื่องแจ้ง<Icon value={ArrowRight01Icon} size={16} /></Link>
       </div>
     </div>
-    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted"><p className="inline-flex items-center gap-2"><Icon value={InformationCircleIcon} size={14} />ข้อมูลตัวอย่าง · สถานะปัจจุบันของเรื่องที่แจ้งในช่วงที่เลือก</p><span className="rounded-full border border-line bg-surface px-3 py-1">{period}</span></div>
+    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted"><p className="inline-flex items-center gap-2"><Icon value={InformationCircleIcon} size={14} />สถานะปัจจุบันของเรื่องที่แจ้งในช่วงที่เลือก</p><span className="rounded-full border border-line bg-surface px-3 py-1">{period}</span></div>
 
     <section aria-label="สถิติเรื่องแจ้ง" className="grid grid-cols-2 gap-3 min-[75rem]:grid-cols-4">
       {stats.map(card => <Link key={card.title} href={href(card.status)} className={`group rounded-2xl border border-line bg-surface p-4 shadow-xs transition-colors hover:border-primary sm:p-5 ${focusClass}`}>
@@ -82,16 +81,16 @@ export default function AdminDashboard() {
       </section>
       <section className={panelClass}>
         <PanelHeading title="กิจกรรมล่าสุด" action={<span className="text-[10px] text-muted">{period}</span>} />
-        <div className="divide-y divide-line">{data.activities.map(activity => <Link key={`${activity.ticketId}-${activity.event.id}`} href={`/admin/tickets/${activity.ticketId}`} className={`flex gap-3 rounded-sm py-2 first:pt-0 last:pb-0 ${focusClass}`}><span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${STATUS_DOTS[activity.event.status]}`} /><div className="min-w-0"><p className="line-clamp-1 text-xs font-medium leading-relaxed">{activity.event.message}</p><p className="mt-1 truncate text-[11px] text-muted">{activity.ticketId} · {activity.title}</p><time dateTime={activity.event.at} className="mt-1 block text-[10px] text-muted">{formatDate(activity.event.at, true)}</time></div></Link>)}{!data.activities.length && <p className="py-8 text-center text-sm text-muted">ยังไม่มีกิจกรรมจากผู้ดูแลในช่วงนี้</p>}</div>
+        <div className="divide-y divide-line">{data.activities.map(activity => <Link key={`${activity.ticketId}-${activity.event.id}`} href={`/admin/tickets/${activity.ticketId}`} className={`flex gap-3 rounded-sm py-2 first:pt-0 last:pb-0 ${focusClass}`}><span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${STATUS_DOTS[activity.event.status]}`} /><div className="min-w-0"><p className="line-clamp-1 text-xs font-medium leading-relaxed">{activity.event.message}</p><p className="mt-1 truncate text-[11px] text-muted">{activity.ticketNumber} · {activity.title}</p><time dateTime={activity.event.at} className="mt-1 block text-[10px] text-muted">{formatDate(activity.event.at, true)}</time></div></Link>)}{!data.activities.length && <p className="py-8 text-center text-sm text-muted">ยังไม่มีกิจกรรมจากผู้ดูแลในช่วงนี้</p>}</div>
       </section>
       <section className={`${panelClass} md:col-span-2 min-[75rem]:col-span-1`}>
         <PanelHeading title="งานที่ต้องติดตาม" action={<span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium">{data.queue.length} เรื่อง</span>} />
-        {data.queue.length ? <><div className="space-y-3">{data.queue.slice(0, 3).map(ticket => <Link key={ticket.id} href={`/admin/tickets/${ticket.id}`} className={`block rounded-xl border border-line bg-background/50 p-3 transition-colors hover:border-primary ${focusClass}`}><div className="mb-2 flex items-center justify-between gap-2"><span className="text-[10px] text-muted">{ticket.id}</span><span className="text-[10px] font-medium">{STATUS_LABELS[ticket.status]}</span></div><p className="line-clamp-1 text-xs font-medium">{ticket.title}</p><p className="mt-1 text-[10px] text-muted">{ticket.building} · {formatDate(ticket.createdAt)}</p></Link>)}</div><p className="mt-4 text-[10px] text-muted">เรื่องรอรับอยู่ก่อน แล้วเรียงตามวันที่แจ้งเก่าสุด</p></> : <div className="flex min-h-40 flex-col items-center justify-center rounded-xl bg-emerald-50/60 p-4 text-center"><Icon value={CheckmarkCircle02Icon} size={28} className="mb-3 text-emerald-600" /><p className="text-sm font-medium">ไม่มีงานค้างในช่วงนี้</p><p className="mt-1 text-xs text-muted">เลือกเดือนอื่นหรือดูเรื่องแจ้งทั้งหมดได้</p></div>}
+        {data.queue.length ? <><div className="space-y-3">{data.queue.slice(0, 3).map(ticket => <Link key={ticket.id} href={`/admin/tickets/${ticket.id}`} className={`block rounded-xl border border-line bg-background/50 p-3 transition-colors hover:border-primary ${focusClass}`}><div className="mb-2 flex items-center justify-between gap-2"><span className="text-[10px] text-muted">{ticket.number ?? ticket.id}</span><span className="text-[10px] font-medium">{STATUS_LABELS[ticket.status]}</span></div><p className="line-clamp-1 text-xs font-medium">{ticket.title}</p><p className="mt-1 text-[10px] text-muted">{ticket.building} · {formatDate(ticket.createdAt)}</p></Link>)}</div><p className="mt-4 text-[10px] text-muted">เรื่องรอรับอยู่ก่อน แล้วเรียงตามวันที่แจ้งเก่าสุด</p></> : <div className="flex min-h-40 flex-col items-center justify-center rounded-xl bg-emerald-50/60 p-4 text-center"><Icon value={CheckmarkCircle02Icon} size={28} className="mb-3 text-emerald-600" /><p className="text-sm font-medium">ไม่มีงานค้างในช่วงนี้</p><p className="mt-1 text-xs text-muted">เลือกเดือนอื่นหรือดูเรื่องแจ้งทั้งหมดได้</p></div>}
       </section>
     </div>
 
     <section className="pt-1"><PanelHeading title="เรื่องแจ้งล่าสุด" action={<Link href={href()} className={`inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink ${focusClass}`}>ดูทั้งหมด<Icon value={ArrowRight01Icon} size={14} /></Link>} /><TicketTable tickets={data.latest} /></section>
-    <p className="text-[10px] text-muted">ข้อมูลตัวอย่างในเบราว์เซอร์นี้ · การเปลี่ยนสถานะจากหน้ารายละเอียดจะแสดงในสรุปนี้ด้วย</p>
+    <p className="text-[10px] text-muted">กดอัปเดตข้อมูลเพื่อดูเรื่องแจ้งและสถานะล่าสุด</p>
   </div>;
 }
 

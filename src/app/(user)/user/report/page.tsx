@@ -1,38 +1,23 @@
-import { ReportCategorySelect } from '../../../../components/report-category-select';
-import { ReportBuildingSelect } from '../../../../components/report-building-select';
-import { ReportPhotoUpload } from '../../../../components/report-photo-upload';
+import Link from "next/link";
+import { randomUUID } from "node:crypto";
+import { ReportForm } from "../../../../components/report-form";
+import { requireProfile } from "../../../../lib/auth";
+import { createClient } from "../../../../lib/supabase/server";
 
-export default function ReportIssuePage() {
-  return (
-    <div className="max-w-md mx-auto p-6 bg-surface rounded-lg shadow-md mt-10">
-      <h1 className="text-2xl font-semibold mb-4 text-ink">แจ้งปัญหาอาคารสถานที่</h1>
-      <form className="space-y-4">
-        <div>
-          <label htmlFor="report-building" className="block text-sm font-medium mb-1">เลือกอาคาร</label>
-          <ReportBuildingSelect />
-        </div>
-        <div>
-          <label htmlFor="report-category" className="block text-sm font-medium mb-1">หมวดหมู่ปัญหา</label>
-          <ReportCategorySelect />
-        </div>
-        <div>
-          <label htmlFor="report-details" className="block text-sm font-medium mb-1">รายละเอียด</label>
-          <textarea 
-            id="report-details"
-            name="details"
-            className="w-full border border-line rounded p-2 focus:outline-none focus:ring-2 focus:ring-primary"
-            rows={4} 
-            placeholder="ระบุห้องหรือจุดที่พบปัญหา..."
-          ></textarea>
-        </div>
-        <ReportPhotoUpload />
-        <button 
-          type="button" 
-          className="w-full bg-primary text-ink font-semibold py-2 rounded hover:bg-primary-hover transition-colors"
-        >
-          ส่งเรื่องแจ้งซ่อม
-        </button>
-      </form>
-    </div>
-  );
+export default async function ReportIssuePage() {
+  await requireProfile();
+  const supabase = await createClient();
+  const [buildings, categories] = await Promise.all([
+    supabase.from("buildings").select("id, name").eq("is_active", true).order("name"),
+    supabase.from("categories").select("id, name").eq("is_active", true).order("name"),
+  ]);
+  const unavailable = buildings.error || categories.error || !buildings.data?.length || !categories.data?.length;
+  return <div className="mx-auto max-w-xl px-4 py-8 sm:px-6">
+    <Link href="/user" className="mb-5 inline-block text-sm text-muted hover:text-ink">← กลับไปเรื่องของฉัน</Link>
+    <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs sm:p-7">
+      <h1 className="text-2xl font-semibold text-ink">แจ้งปัญหาอาคารสถานที่</h1>
+      <p className="mb-6 mt-2 text-sm leading-relaxed text-muted">ระบุจุดที่พบปัญหาให้ชัดเจน เพื่อให้ผู้ดูแลเข้าตรวจสอบได้สะดวก</p>
+      {unavailable ? <p role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">ยังโหลดอาคารหรือหมวดหมู่ไม่ได้ กรุณาโหลดหน้าใหม่ หรือติดต่อผู้ดูแล</p> : <ReportForm submissionId={randomUUID()} buildings={buildings.data!.map(row => ({ value: row.id, label: row.name }))} categories={categories.data!.map(row => ({ value: row.id, label: row.name }))} />}
+    </section>
+  </div>;
 }

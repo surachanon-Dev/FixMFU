@@ -17,7 +17,7 @@ function fileKey(file: File) {
   return `${file.name}:${file.type}:${file.size}:${file.lastModified}`;
 }
 
-export function ReportPhotoUpload() {
+export function ReportPhotoUpload({ onReadingChange }: { onReadingChange?: (reading: boolean) => void }) {
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [error, setError] = useState("");
   const [reading, setReading] = useState(false);
@@ -102,6 +102,7 @@ export function ReportPhotoUpload() {
       return { id: fileKey(file), file, url };
     });
     setReading(true);
+    onReadingChange?.(true);
     try {
       // Decode before accepting a file so corrupt images do not become broken previews.
       await Promise.all(previews.map(async (photo) => {
@@ -116,6 +117,7 @@ export function ReportPhotoUpload() {
       if (mountedRef.current) setError("อ่านรูปไม่สำเร็จ กรุณาเลือกไฟล์รูปที่เปิดดูได้แล้วลองอีกครั้ง");
     } finally {
       if (mountedRef.current) setReading(false);
+      onReadingChange?.(false);
     }
   }
 
