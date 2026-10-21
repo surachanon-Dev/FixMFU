@@ -137,3 +137,23 @@ test('OAuth site origin rejects insecure remote URLs and redirect injection', ()
     assert.equal(origin.getAuthOrigin(),value);
   }
 });
+
+test('exceptions after an OAuth exchange discard the new session before redirecting', async () => {
+  for (const failure of ['identity', 'profile']) {
+    const fake = fakeClient();
+    if (failure === 'identity') fake.client.auth.getUser = async () => { throw new Error('private provider details'); };
+    else fake.client.from = () => { throw new Error('private database details'); };
+    const response = await callback(fake.client).GET({nextUrl:new URL('https://portal.example/auth/callback?code=private-code')});
+    assert.equal(fake.signOuts(), 1);
+    assert.equal(response.headers.get('location'), 'https://portal.example/login?error=oauth');
+    assert.equal(response.headers.get('referrer-policy'), 'no-referrer');
+    assert.match(response.headers.get('cache-control'), /no-store/);
+  }
+});
+
+test('an unavailable signout service cannot turn a rejected callback into a server error', async () => {
+  const fake = fakeClient({role:null});
+  fake.client.auth.signOut = async () => { throw new Error('Auth offline'); };
+  const response = await callback(fake.client).GET({nextUrl:new URL('https://portal.example/auth/callback?code=fixture')});
+  assert.equal(response.headers.get('location'), 'https://portal.example/login?error=profile');
+});

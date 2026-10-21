@@ -1,7 +1,7 @@
 import AdminTicketList from "../../../../components/admin-ticket-list";
-import { getAdminReports } from "../../../../lib/user-reports";
+import { getAdminTicketSummaries } from "../../../../lib/user-reports";
 
 export default async function AdminTicketsPage() {
-  const tickets = await getAdminReports();
+  const tickets = await getAdminTicketSummaries();
   return <AdminTicketList tickets={tickets} />;
 }

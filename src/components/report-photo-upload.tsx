@@ -17,15 +17,30 @@ function fileKey(file: File) {
   return `${file.name}:${file.type}:${file.size}:${file.lastModified}`;
 }
 
-export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = "รูปประกอบปัญหา" }: { onReadingChange?: (reading: boolean) => void; onSelectionChange?: () => void; label?: string }) {
+export function ReportPhotoUpload({ onReadingChange, onSelectionChange, onCountChange, label = "รูปประกอบปัญหา" }: { onReadingChange?: (reading: boolean) => void; onSelectionChange?: () => void; onCountChange?: (count: number) => void; label?: string }) {
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [error, setError] = useState("");
   const [reading, setReading] = useState(false);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const previewRef = useRef<HTMLDialogElement>(null);
   const selectedRef = useRef<PhotoPreview[]>([]);
   const urlsRef = useRef(new Set<string>());
   const mountedRef = useRef(false);
   const hintId = useId();
+  const previewTitleId = useId();
+  const previewPhoto = photos.find(photo => photo.id === previewId);
+  const totalBytes = photos.reduce((sum, photo) => sum + photo.file.size, 0);
+
+  useEffect(() => { onCountChange?.(photos.length); }, [photos.length, onCountChange]);
+
+  useEffect(() => {
+    const dialog = previewRef.current;
+    if (!dialog) return;
+    if (previewPhoto && !dialog.open) dialog.showModal();
+    else if (!previewPhoto && dialog.open) dialog.close();
+  }, [previewPhoto]);
 
   function syncFiles(next: PhotoPreview[]) {
     const transfer = new DataTransfer();
@@ -55,6 +70,7 @@ export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = 
       selectedRef.current = [];
       setPhotos([]);
       setError("");
+      setPreviewId(null);
     };
     form?.addEventListener("reset", reset);
     return () => {
@@ -70,7 +86,7 @@ export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = 
     const previous = selectedRef.current;
     // Keep the actual file field aligned with the previews, including rejected picks.
     syncFiles(previous);
-    if (!files.length) return;
+    if (!files.length || reading) return;
     setError("");
     const keys = new Set(previous.map((photo) => photo.id));
     const additions = files.filter((file) => {
@@ -89,6 +105,10 @@ export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = 
     }
     if (additions.some((file) => !IMAGE_TYPES.includes(file.type))) {
       setError("กรุณาเลือกไฟล์รูป JPG, PNG หรือ WebP เท่านั้น");
+      return;
+    }
+    if (additions.some(file => file.size === 0 || file.name.length > 255)) {
+      setError("ไฟล์รูปต้องไม่ว่าง และชื่อไฟล์ต้องไม่เกิน 255 ตัวอักษร กรุณาเลือกรูปใหม่");
       return;
     }
     const totalBytes = [...previous.map((photo) => photo.file), ...additions].reduce((total, file) => total + file.size, 0);
@@ -128,6 +148,8 @@ export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = 
     saveSelection(selectedRef.current.filter((item) => item.id !== id));
     release(photo);
     setError("");
+    if (previewId === id) setPreviewId(null);
+    requestAnimationFrame(() => addButtonRef.current?.focus());
   }
 
   return (
@@ -138,6 +160,7 @@ export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = 
       </div>
       <input ref={inputRef} type="file" name={photos.length ? "photos" : undefined} accept={IMAGE_TYPES.join(",")} multiple hidden disabled={reading} onChange={selectPhotos} />
       <button
+        ref={addButtonRef}
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={reading || photos.length >= MAX_PHOTOS}
@@ -150,17 +173,25 @@ export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = 
         </svg>
         {reading ? "กำลังตรวจรูป…" : photos.length >= MAX_PHOTOS ? "แนบครบ 3 รูปแล้ว" : photos.length ? "เพิ่มรูปภาพอีก" : "เพิ่มรูปภาพ"}
       </button>
-      <p id={hintId} className="text-xs leading-5 text-muted">แนบรูปจุดที่พบปัญหาได้สูงสุด 3 รูป · JPG, PNG หรือ WebP · ขนาดรวมไม่เกิน 2 MB</p>
+      <div id={hintId} className="space-y-2 text-xs leading-relaxed text-muted">
+        <p>JPG, PNG หรือ WebP · สูงสุด 3 รูป · ขนาดรวมไม่เกิน 2 MB</p>
+        {photos.length ? <>
+          <div role="meter" aria-label="ขนาดรูปทั้งหมด" aria-valuemin={0} aria-valuemax={MAX_TOTAL_BYTES} aria-valuenow={totalBytes} aria-valuetext={`${Math.ceil(totalBytes / 1024)} จาก 2,048 KB`} className="h-1.5 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-primary" style={{ width: `${totalBytes / MAX_TOTAL_BYTES * 100}%` }} /></div>
+          <p role="status">ใช้ไป {Math.ceil(totalBytes / 1024).toLocaleString("th-TH")} KB · เหลือ {Math.floor((MAX_TOTAL_BYTES - totalBytes) / 1024).toLocaleString("th-TH")} KB · กดรูปเพื่อดูขนาดใหญ่</p>
+        </> : <p>ส่งเรื่องได้โดยไม่แนบรูป รูปที่เลือกจะแสดงให้ตรวจดูก่อนส่ง</p>}
+      </div>
       {error ? <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p> : null}
       {photos.length ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {photos.map((photo, index) => (
             <figure key={photo.id} className="min-w-0 overflow-hidden rounded-xl border border-line bg-surface">
               <div className="relative aspect-[4/3] bg-background">
+                <button type="button" onClick={() => setPreviewId(photo.id)} aria-label={`ดูรูป ${photo.file.name} ขนาดใหญ่`} className="h-full w-full focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary">
                 {/* Local object URLs provide immediate previews without uploading or image optimization. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={photo.url} alt={`${label} ${index + 1}: ${photo.file.name}`} className="h-full w-full object-contain" />
-                <button type="button" disabled={reading} onClick={() => removePhoto(photo.id)} aria-label={`ลบรูป ${photo.file.name}`} className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/95 text-ink shadow-sm hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50">
+                </button>
+                <button type="button" disabled={reading} onClick={() => removePhoto(photo.id)} aria-label={`ลบรูป ${photo.file.name}`} className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface/95 text-ink shadow-sm hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50">
                   <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
                 </button>
               </div>
@@ -172,6 +203,16 @@ export function ReportPhotoUpload({ onReadingChange, onSelectionChange, label = 
           ))}
         </div>
       ) : null}
+      <dialog ref={previewRef} aria-labelledby={previewTitleId} onClose={() => setPreviewId(null)} onClick={event => { if (event.target === event.currentTarget) previewRef.current?.close(); }} className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-3xl overflow-y-auto rounded-2xl border border-line bg-surface p-4 text-ink shadow-xl backdrop:bg-ink/60">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <h3 id={previewTitleId} className="min-w-0 break-words text-sm font-medium">{previewPhoto?.file.name ?? "ดูรูปภาพ"}</h3>
+          <button type="button" onClick={() => previewRef.current?.close()} className="min-h-11 shrink-0 rounded-lg border border-line px-3 text-sm font-medium hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">ปิดรูป</button>
+        </div>
+        {previewPhoto && <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewPhoto.url} alt={`${label}: ${previewPhoto.file.name}`} className="max-h-[70dvh] w-full object-contain" />
+        </>}
+      </dialog>
     </section>
   );
 }

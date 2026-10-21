@@ -19,7 +19,7 @@ function Icon({ value, size = 18, className = "" }: { value: IconSvgElement; siz
 }
 
 function PanelHeading({ title, action }: { title: string; action?: ReactNode }) {
-  return <div className="mb-5 flex items-center justify-between gap-3"><h2 className="text-base font-medium text-ink">{title}</h2>{action}</div>;
+  return <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 className="text-base font-medium text-ink">{title}</h2>{action}</div>;
 }
 
 export default function AdminDashboard({ tickets }: { tickets: Ticket[] }) {
@@ -29,6 +29,8 @@ export default function AdminDashboard({ tickets }: { tickets: Ticket[] }) {
   const year = selection.year ?? years[0];
   const month = selection.month;
   const data = summarizeDashboard(tickets, year, month);
+  const selectedIds = new Set(data.selected.map(ticket => ticket.id));
+  const otherOpen = tickets.filter(ticket => (ticket.status === "pending" || ticket.status === "in_progress") && !selectedIds.has(ticket.id));
   const period = month === null ? `ปี ${year + 543}` : formatMonth(`${year}-${String(month + 1).padStart(2, "0")}`);
   const href = (status?: TicketStatus, building?: string) => dashboardTicketHref(year, month, status, building);
   const share = (value: number) => data.total ? Math.round(value / data.total * 100) : 0;
@@ -50,6 +52,7 @@ export default function AdminDashboard({ tickets }: { tickets: Ticket[] }) {
       </div>
     </div>
     <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted"><p className="inline-flex items-center gap-2"><Icon value={InformationCircleIcon} size={14} />สถานะปัจจุบันของเรื่องที่แจ้งในช่วงที่เลือก</p><span className="rounded-full border border-line bg-surface px-3 py-1">{period}</span></div>
+    {otherOpen.length > 0 && <aside aria-label="งานค้างนอกช่วงสรุป" className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4"><div><p className="text-sm font-semibold text-amber-950">ยังมีงานค้างนอกช่วงที่เลือก {otherOpen.length} เรื่อง</p><p className="mt-1 text-xs text-amber-900">ตัวเลขด้านล่างสรุปเฉพาะ {period} · เปิดคิวรวมเพื่อตรวจงานจากเดือนหรือปีก่อนด้วย</p></div><Link href="/admin/tickets?sort=priority" className={`inline-flex min-h-11 items-center gap-2 rounded-lg border border-amber-300 bg-surface px-4 text-sm font-medium ${focusClass}`}>เปิดรายการเรียงคิวงาน<Icon value={ArrowRight01Icon} size={16} /></Link></aside>}
 
     <section aria-label="สถิติเรื่องแจ้ง" className="grid grid-cols-2 gap-3 min-[75rem]:grid-cols-4">
       {stats.map(card => <Link key={card.title} href={href(card.status)} className={`group rounded-2xl border border-line bg-surface p-4 shadow-xs transition-colors hover:border-primary sm:p-5 ${focusClass}`}>
@@ -62,7 +65,7 @@ export default function AdminDashboard({ tickets }: { tickets: Ticket[] }) {
     <div className="grid gap-4 min-[75rem]:grid-cols-[minmax(0,1.75fr)_minmax(280px,1fr)]">
       <section className={`${panelClass} min-w-0`}>
         <PanelHeading title="จำนวนเรื่องแจ้งรายเดือน" action={<button type="button" onClick={() => setSelection({ year, month: null })} aria-pressed={month === null} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${month === null ? "border-primary/20 bg-primary/10 text-ink" : "border-line text-muted hover:text-ink"} ${focusClass}`}>ทั้งปี</button>} />
-        <label className="mb-4 flex items-center justify-between gap-3 text-xs text-muted sm:hidden">ช่วงสรุป<select aria-label="เดือนที่สรุป" value={month ?? ""} onChange={event => setSelection({ year, month: event.target.value === "" ? null : Number(event.target.value) })} className="rounded-lg border border-line px-3 py-2.5 text-sm text-ink focus-visible:outline-2 focus-visible:outline-primary"><option value="">ทั้งปี</option>{MONTH_LABELS.map((label, index) => <option key={label} value={index}>{label} {year + 543}</option>)}</select></label>
+        <label className="mb-4 flex max-w-sm items-center justify-between gap-3 text-xs text-muted">ช่วงสรุป<select aria-label="เดือนที่สรุป" value={month ?? ""} onChange={event => setSelection({ year, month: event.target.value === "" ? null : Number(event.target.value) })} className="min-h-11 rounded-lg border border-line px-3 py-2.5 text-sm text-ink focus-visible:outline-2 focus-visible:outline-primary"><option value="">ทั้งปี</option>{MONTH_LABELS.map((label, index) => <option key={label} value={index}>{label} {year + 543}</option>)}</select></label>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-muted">ทั้งหมด <span className="font-medium text-ink">{data.annualTotal} เรื่อง</span> ในปี {year + 543}</p><div className="flex items-center gap-3 text-xs text-muted"><span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-primary" />เสร็จสิ้น</span><span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm border border-primary/40 bg-primary/10" />สถานะอื่น</span></div></div>
         <MonthlyTicketChart rows={data.monthly} year={year} selectedMonth={month} onSelect={value => setSelection({ year, month: month === value ? null : value })} />
         <p className="mt-2 text-xs text-muted">เลื่อนกราฟเพื่อดูทุกเดือน แล้วกดเดือนเพื่อเลือกช่วง · นับตามวันที่แจ้งในเขตเวลาไทย</p>

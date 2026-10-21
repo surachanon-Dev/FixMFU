@@ -89,3 +89,17 @@ test('empty, unavailable or changed database never falls back to demo rows or ca
   const signed=harness({rows:[row(1,true)],signError:true});
   await assert.rejects(signed.reports.getAdminReports(),/REPORT_PHOTOS_UNAVAILABLE/);
 });
+
+test('admin list and report summaries skip photo signing, event histories and contact details',async()=>{
+  const {reports,calls}=harness({rows:[row(1,true),row(2)]});
+  const data=await reports.getAdminTicketSummaries();
+  assert.equal(data.length,2);assert.equal(data[0].reporter.name,'ผู้แจ้ง 1');
+  assert.equal(data[0].reporter.contact,'');assert.equal(data[0].photos.length,0);assert.equal(data[0].history.length,0);
+  assert.equal(calls.signed.length,0);assert.equal(calls.auth[0],true);
+  assert.ok(!calls.queries[0].select.includes('ticket_attachments'));
+  assert.ok(!calls.queries[0].select.includes('ticket_events'));
+  assert.ok(!calls.queries[0].select.includes('contact'));
+  const denied=harness({role:'user'});
+  await assert.rejects(()=>denied.reports.getAdminTicketSummaries(),/ACCESS_DENIED/);
+  assert.equal(denied.calls.clients,0);
+});

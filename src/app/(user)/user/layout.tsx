@@ -4,6 +4,7 @@ import PortalNavigation from "../../../components/portal-navigation";
 import UserNotificationToggle from "../../../components/user-notification-toggle";
 import { requireProfile } from "../../../lib/auth";
 import { AuthSessionControls } from "../../../components/auth-session-controls";
+import ConnectionStatus from "../../../components/connection-status";
 
 export const metadata: Metadata = {
   title: "FixMFU - แจ้งซ่อมและติดตามสถานะ",
@@ -13,6 +14,7 @@ export default async function UserLayout({ children }: Readonly<{ children: Reac
   const profile = await requireProfile();
   return (
     <>
+      <a href="#user-main-content" className="sr-only z-[70] rounded-xl bg-ink px-4 py-3 text-sm font-medium text-surface focus:not-sr-only focus:fixed focus:left-4 focus:top-4">ข้ามไปยังเนื้อหา</a>
       <header className="sticky top-0 z-50 border-b border-line bg-surface text-ink">
         <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)] items-center gap-x-6 gap-y-3 px-4 py-4 sm:px-6 lg:flex lg:flex-wrap lg:px-8">
           <Link href="/user" aria-label="FixMFU หน้าผู้ใช้งาน" className="order-1 shrink-0 text-xl font-semibold tracking-tight">Fix<span className="text-primary">MFU</span></Link>
@@ -21,7 +23,8 @@ export default async function UserLayout({ children }: Readonly<{ children: Reac
           <div className="order-3 col-span-2 flex justify-end lg:order-4"><AuthSessionControls profile={profile} userPortal /></div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-7xl flex-1 pb-8">{children}</main>
+      <ConnectionStatus />
+      <main id="user-main-content" tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 pb-8 outline-none">{children}</main>
     </>
   );
 }

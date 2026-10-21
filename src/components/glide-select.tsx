@@ -2,7 +2,7 @@
 
 // Adapted from React Bits GlideSelect. See react-bits-LICENSE.md.
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { KeyboardEvent, PointerEvent } from "react";
+import type { CSSProperties, KeyboardEvent, PointerEvent } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import "./glide-select.css";
@@ -21,6 +21,9 @@ interface GlideSelectProps {
   name?: string;
   ariaLabel: string;
   placeholder?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 type Phase = "closed" | "open" | "closing";
@@ -29,20 +32,23 @@ const STEP = ROW_HEIGHT + 1;
 const MENU_GAP = 6;
 const CLOSE_DURATION = 140;
 
-export default function GlideSelect({ options, value, onChange, id, name, ariaLabel, placeholder = "เลือกหมวดหมู่" }: GlideSelectProps) {
+export default function GlideSelect({ options, value, onChange, id, name, ariaLabel, placeholder = "เลือกหมวดหมู่", required, invalid, describedBy }: GlideSelectProps) {
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const selected = options.findIndex((option) => option.value === value);
   const [phase, setPhase] = useState<Phase>("closed");
   const [active, setActive] = useState<number | null>(null);
   const [side, setSide] = useState<"top" | "bottom">("bottom");
+  const [availableHeight, setAvailableHeight] = useState(320);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLSpanElement>(null);
   const instant = useRef(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const scrub = useRef<{ id: number; top: number } | null>(null);
+  const search = useRef({ text: "", at: 0 });
 
   const close = useCallback((animate = false) => {
     clearTimeout(closeTimer.current);
@@ -56,14 +62,18 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
     closeTimer.current = setTimeout(() => setPhase("closed"), CLOSE_DURATION);
   }, []);
 
-  const open = (viaKey: boolean) => {
+  const open = (viaKey: boolean, fallbackIndex = 0) => {
     if (!options.length) return;
     clearTimeout(closeTimer.current);
     const bounds = rootRef.current?.getBoundingClientRect();
-    const needed = options.length * STEP + 7 + MENU_GAP;
-    setSide(bounds && bounds.bottom + needed > window.innerHeight && bounds.top >= needed ? "top" : "bottom");
+    const below = Math.max(0, window.innerHeight - (bounds?.bottom ?? 0) - MENU_GAP - 12);
+    const above = Math.max(0, (bounds?.top ?? 0) - MENU_GAP - 12);
+    const needed = Math.min(options.length * STEP + 8, 320);
+    const nextSide = below >= needed || below >= above ? "bottom" : "top";
+    setSide(nextSide);
+    setAvailableHeight(Math.max(ROW_HEIGHT, (nextSide === "bottom" ? below : above) - 10));
     instant.current = true;
-    setActive(selected >= 0 ? selected : viaKey ? 0 : null);
+    setActive(selected >= 0 ? selected : viaKey ? fallbackIndex : null);
     setPhase("open");
   };
 
@@ -86,6 +96,12 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
     pill.style.transform = `translateY(${active * STEP}px)`;
     pill.style.opacity = "1";
     instant.current = false;
+    const list = listRef.current;
+    if (list && !scrub.current) {
+      const rowTop = active * STEP;
+      if (rowTop < list.scrollTop) list.scrollTop = rowTop;
+      else if (rowTop + ROW_HEIGHT > list.scrollTop + list.clientHeight) list.scrollTop = rowTop + ROW_HEIGHT - list.clientHeight;
+    }
   }, [active, phase]);
 
   useEffect(() => {
@@ -94,7 +110,12 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
       if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close(true);
     };
     document.addEventListener("pointerdown", onDown, true);
-    return () => document.removeEventListener("pointerdown", onDown, true);
+    const onResize = () => close();
+    window.addEventListener("resize", onResize);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("resize", onResize);
+    };
   }, [phase, close]);
 
   useEffect(() => () => clearTimeout(closeTimer.current), []);
@@ -114,7 +135,7 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
     if (phase !== "open") {
       if (["Enter", " ", "ArrowDown", "ArrowUp"].includes(key)) {
         event.preventDefault();
-        open(true);
+        open(true, key === "ArrowUp" ? options.length - 1 : 0);
       }
       return;
     }
@@ -133,9 +154,13 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
       if (key === "Escape") event.preventDefault();
       close();
     } else if (key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      const now = Date.now();
+      search.current.text = now - search.current.at > 600 ? key : search.current.text + key;
+      search.current.at = now;
+      const query = search.current.text.toLocaleLowerCase("th-TH");
       for (let offset = 1; offset <= options.length; offset++) {
         const index = (current + offset) % options.length;
-        if (options[index].label.toLowerCase().startsWith(key.toLowerCase())) {
+        if (options[index].label.toLocaleLowerCase("th-TH").startsWith(query)) {
           go(index);
           break;
         }
@@ -146,7 +171,7 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
   const rowAt = (y: number) => {
     if (!scrub.current) return null;
     // The list starts inside the menu padding; its own top needs no padding offset.
-    const index = Math.floor((y - scrub.current.top) / STEP);
+    const index = Math.floor((y - scrub.current.top + (listRef.current?.scrollTop ?? 0)) / STEP);
     return index >= 0 && index < options.length ? index : null;
   };
 
@@ -162,6 +187,7 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
       ref={rootRef}
       className="glide-select w-full"
       data-side={side}
+      style={{ "--gs-available": `${availableHeight}px` } as CSSProperties}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) close();
       }}
@@ -180,6 +206,9 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
         aria-controls={phase === "open" ? `${controlId}-list` : undefined}
         aria-activedescendant={phase === "open" && active !== null ? `${controlId}-${active}` : undefined}
         aria-label={ariaLabel}
+        aria-required={required}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         disabled={!options.length}
         className="glide-select__trigger"
         onClick={() => phase === "open" ? close(true) : open(false)}
@@ -195,6 +224,7 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
       {phase !== "closed" ? (
         <div ref={menuRef} className="glide-select__menu" data-state={phase === "open" ? "open" : "closed"} data-side={side} data-align="left" inert={phase !== "open"} aria-hidden={phase !== "open"}>
           <div
+            ref={listRef}
             id={`${controlId}-list`}
             role="listbox"
             aria-label={ariaLabel}
@@ -206,7 +236,7 @@ export default function GlideSelect({ options, value, onChange, id, name, ariaLa
               if (row) setActive(Number(row.dataset.index));
             }}
             onPointerDown={(event) => {
-              if (event.button !== 0 || scrub.current) return;
+              if (event.button !== 0 || scrub.current || event.pointerType === "touch") return;
               event.preventDefault();
               event.currentTarget.setPointerCapture(event.pointerId);
               scrub.current = { id: event.pointerId, top: event.currentTarget.getBoundingClientRect().top };

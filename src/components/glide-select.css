@@ -62,6 +62,10 @@
   outline-offset: 2px;
 }
 
+.glide-select__trigger[aria-invalid='true'] {
+  border-color: #b42318;
+}
+
 .glide-select__trigger:disabled {
   cursor: default;
 }
@@ -82,6 +86,17 @@
 
 .glide-select__label[data-empty] {
   opacity: 0.6;
+}
+
+.glide-select__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glide-select__chevron {
+  flex-shrink: 0;
 }
 
 .glide-select[data-swap] .glide-select__label {
@@ -153,7 +168,12 @@
   position: relative;
   display: grid;
   gap: 1px;
-  touch-action: none;
+  max-height: min(320px, var(--gs-available, 320px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  touch-action: pan-y;
 }
 
 .glide-select__pill {
