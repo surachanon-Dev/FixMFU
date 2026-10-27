@@ -16,8 +16,8 @@ export default async function ReportIssuePage({ searchParams }: { searchParams: 
     supabase.from("categories").select("id, name").eq("is_active", true).order("name"),
   ]);
   const unavailable = buildings.error || categories.error || !buildings.data?.length || !categories.data?.length;
-  return <div className="mx-auto max-w-xl px-4 py-8 sm:px-6">
-    <Link href="/user" className="mb-5 inline-block text-sm text-muted hover:text-ink">← กลับไปเรื่องของฉัน</Link>
+  return <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-8">
+    <Link href="/user" className="mb-4 inline-flex min-h-11 items-center rounded-lg text-sm text-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">← กลับไปเรื่องของฉัน</Link>
     <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs sm:p-7">
       <h1 className="text-2xl font-semibold text-ink">แจ้งปัญหาอาคารสถานที่</h1>
       <p className="mb-6 mt-2 text-sm leading-relaxed text-muted">ระบุจุดที่พบปัญหาให้ชัดเจน เพื่อให้ผู้ดูแลเข้าตรวจสอบได้สะดวก</p>

@@ -7,6 +7,9 @@ import { CheckmarkCircle02Icon, Clock01Icon, InformationCircleIcon, Search01Icon
 import { STATUS_LABELS, type Ticket, type TicketStatus } from "../lib/tickets";
 import UserReportStart from "./user-report-start";
 import UserTicketCard from "./user-ticket-card";
+import RubberSegment from "./rubber-segment";
+import { RefreshReports } from "./refresh-reports";
+import { selectUserTickets, type UserTicketSort } from "../lib/user-ticket-filters";
 
 const focusClass = "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary";
 const summaries: { status: TicketStatus; label: string; icon: IconSvgElement; color: string }[] = [
@@ -22,10 +25,15 @@ function Icon({ value, size = 18, className = "" }: { value: IconSvgElement; siz
 export function UserTickets({ tickets }: { tickets: Ticket[] }) {
   const [status, setStatus] = useState<TicketStatus | "all">("all");
   const [search, setSearch] = useState("");
-  const own = [...tickets].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const [sort, setSort] = useState<UserTicketSort>("newest");
+  const [visibleCount, setVisibleCount] = useState(6);
+  const own = tickets;
   const count = (value: TicketStatus) => own.filter(ticket => ticket.status === value).length;
   const query = search.trim().toLocaleLowerCase("th");
-  const filtered = own.filter(ticket => (status === "all" || ticket.status === status) && [ticket.number ?? ticket.id, ticket.title, ticket.building, ticket.location, ticket.category].join(" ").toLocaleLowerCase("th").includes(query));
+  const filtered = selectUserTickets(own, status, search, sort);
+  const visible = filtered.slice(0, visibleCount);
+  function chooseStatus(value: TicketStatus | "all") { setStatus(value); setVisibleCount(6); }
+  function clearFilters() { chooseStatus("all"); setSearch(""); setSort("newest"); }
   const filters: { value: TicketStatus | "all"; label: string; count: number }[] = [{ value: "all", label: "ทั้งหมด", count: own.length }, ...summaries.map(item => ({ value: item.status, label: item.label, count: count(item.status) })), ...(count("cancelled") ? [{ value: "cancelled" as const, label: STATUS_LABELS.cancelled, count: count("cancelled") }] : [])];
   return <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
     <section aria-labelledby="user-welcome-title" className="rounded-[28px] bg-[#211E18] p-5 text-surface sm:p-8 lg:p-12">
@@ -42,15 +50,26 @@ export function UserTickets({ tickets }: { tickets: Ticket[] }) {
       </div>
     </section>
 
-    <section aria-label="สรุปสถานะเรื่องของฉัน" className="grid gap-3 sm:grid-cols-3 sm:gap-4">{summaries.map(item => <button key={item.status} type="button" aria-pressed={status === item.status} aria-controls="my-ticket-list" aria-label={`${item.label} ${count(item.status)} เรื่อง`} onClick={() => setStatus(status === item.status ? "all" : item.status)} className={`flex items-center justify-between gap-3 rounded-3xl border bg-surface p-5 text-left transition-colors sm:p-6 ${status === item.status ? "border-primary ring-2 ring-primary/10" : "border-line hover:border-primary/50"} ${focusClass}`}>
-      <div><p className="text-sm text-muted">{item.label}</p><p className="mt-1 text-3xl font-semibold tabular-nums">{count(item.status)}<span className="ml-2 text-sm font-normal text-ink">เรื่อง</span></p></div><span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.color}`}><Icon value={item.icon} size={25} /></span>
-    </button>)}</section>
+    <section aria-label="สรุปสถานะเรื่องของฉัน">
+      <RubberSegment variant="cards" columns={3} radius={24} inset={0} trackColor="transparent" thumbColor="var(--color-surface)" allowEmpty value={status} onChange={value => chooseStatus(value as TicketStatus)} onClear={() => chooseStatus("all")} ariaLabel="กรองเรื่องแจ้งตามสถานะ" controlsId="my-ticket-list" items={summaries.map(item => ({
+        value: item.status,
+        ariaLabel: `${item.label} ${count(item.status)} เรื่อง`,
+        label: <span className="flex w-full items-center justify-between gap-3"><span><span className="block text-sm text-muted">{item.label}</span><span className="mt-1 block text-3xl font-semibold tabular-nums">{count(item.status)}<span className="ml-2 text-sm font-normal text-ink">เรื่อง</span></span></span><span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.color}`}><Icon value={item.icon} size={25} /></span></span>,
+      }))} />
+      <p className="sr-only">เลือกสถานะเพื่อกรองรายการ กดสถานะเดิมซ้ำเพื่อดูเรื่องทั้งหมด</p>
+    </section>
 
     <section id="my-tickets" className="scroll-mt-44 space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-semibold">เรื่องแจ้งซ่อมของฉัน</h2><p className="mt-1 text-sm text-muted">ติดตามความคืบหน้าและอัปเดตจากผู้ดูแล</p></div><p aria-live="polite" className="rounded-full bg-surface px-3 py-1.5 text-xs text-muted">พบ {filtered.length} จาก {own.length} เรื่อง</p></div>
-      <div className="flex flex-wrap items-center justify-between gap-3"><div role="group" aria-label="กรองสถานะเรื่องแจ้ง" className="flex flex-wrap gap-1.5">{filters.map(filter => <button key={filter.value} type="button" aria-pressed={status === filter.value} aria-controls="my-ticket-list" onClick={() => setStatus(filter.value)} className={`rounded-full px-3 py-2 text-xs transition-colors ${status === filter.value ? "bg-ink font-medium text-surface" : "bg-surface text-muted hover:text-ink"} ${focusClass}`}>{filter.label}<span className="ml-1.5 opacity-70">{filter.count}</span></button>)}</div><label className="flex w-full items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5 focus-within:border-primary sm:w-60"><Icon value={Search01Icon} size={16} className="shrink-0 text-muted" /><span className="sr-only">ค้นหาเรื่องของฉัน</span><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="ค้นหาเรื่องหรืออาคาร" className="min-w-0 w-full text-sm outline-none" /></label></div>
-      <p className="flex items-start gap-2 text-xs leading-relaxed text-muted"><Icon value={InformationCircleIcon} size={14} className="mt-0.5 shrink-0" />แสดงเฉพาะเรื่องที่คุณแจ้ง · โหลดหน้าใหม่เพื่อดูสถานะล่าสุด</p>
-      <div id="my-ticket-list" className="space-y-4">{filtered.map(ticket => <UserTicketCard key={ticket.id} ticket={ticket} />)}{!filtered.length && <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-12 text-center"><span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10"><Icon value={Task01Icon} size={25} /></span><p className="font-medium">{!own.length ? "ยังไม่มีเรื่องแจ้งซ่อม" : query ? "ไม่พบเรื่องที่ตรงกับการค้นหา" : "ยังไม่มีเรื่องในสถานะนี้"}</p><p className="mt-2 text-sm text-muted">{!own.length ? "เริ่มแจ้งปัญหาที่พบ แล้วติดตามการแก้ไขได้ที่นี่" : "ลองเลือกสถานะอื่นหรือเปลี่ยนคำค้นหา"}</p>{own.length ? <button type="button" onClick={() => { setStatus("all"); setSearch(""); }} className={`mt-5 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium ${focusClass}`}>ดูเรื่องทั้งหมด</button> : <Link href="/user/report" className={`mt-5 inline-block rounded-lg bg-primary px-4 py-2.5 text-sm font-medium ${focusClass}`}>แจ้งปัญหาใหม่</Link>}</div>}</div>
+      <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-semibold">เรื่องแจ้งซ่อมของฉัน</h2><p className="mt-1 text-sm text-muted">ติดตามความคืบหน้าและอัปเดตจากผู้ดูแล</p></div><RefreshReports label="อัปเดตสถานะ" /></div>
+      <div role="group" aria-label="กรองสถานะเรื่องแจ้ง" className="flex flex-wrap gap-1.5">{filters.map(filter => <button key={filter.value} type="button" aria-pressed={status === filter.value} aria-controls="my-ticket-list" onClick={() => chooseStatus(filter.value)} className={`min-h-11 rounded-full px-3 py-2 text-xs transition-colors ${status === filter.value ? "bg-ink font-medium text-surface" : "bg-surface text-muted hover:text-ink"} ${focusClass}`}>{filter.label}<span className="ml-1.5 opacity-70">{filter.count}</span></button>)}</div>
+      <div className="grid gap-3 rounded-2xl border border-line bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <label className="flex min-h-12 items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5 focus-within:border-primary"><Icon value={Search01Icon} size={18} className="shrink-0 text-muted" /><span className="sr-only">ค้นหาเรื่องของฉัน</span><input type="search" value={search} onChange={event => { setSearch(event.target.value); setVisibleCount(6); }} placeholder="ค้นหารหัสเรื่อง หัวข้อ อาคาร หรือสถานที่" className="min-w-0 w-full text-sm outline-none" /></label>
+        <label className="flex items-center gap-2 text-sm"><span className="shrink-0 text-muted">เรียงตาม</span><select aria-label="เรียงเรื่องแจ้ง" value={sort} onChange={event => { setSort(event.target.value as UserTicketSort); setVisibleCount(6); }} className={`min-h-12 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2 text-sm ${focusClass}`}><option value="newest">แจ้งล่าสุด</option><option value="updated">อัปเดตล่าสุด</option><option value="oldest">แจ้งเก่าสุด</option></select></label>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2"><p aria-live="polite" className="text-xs text-muted">แสดง {visible.length} จาก {filtered.length} เรื่อง{status !== "all" ? ` · ${STATUS_LABELS[status]}` : ""}</p>{(status !== "all" || search || sort !== "newest") && <button type="button" onClick={clearFilters} className={`min-h-11 rounded-lg px-3 py-2 text-sm font-medium underline underline-offset-4 ${focusClass}`}>ล้างตัวกรอง</button>}</div>
+      <p className="flex items-start gap-2 text-xs leading-relaxed text-muted"><Icon value={InformationCircleIcon} size={14} className="mt-0.5 shrink-0" />แสดงเฉพาะเรื่องที่คุณแจ้ง · กดอัปเดตสถานะเพื่อดูความคืบหน้าล่าสุด</p>
+      <div id="my-ticket-list" className="space-y-4">{visible.map(ticket => <UserTicketCard key={ticket.id} ticket={ticket} />)}{!filtered.length && <div className="rounded-2xl border border-dashed border-line bg-surface px-6 py-12 text-center"><span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10"><Icon value={Task01Icon} size={25} /></span><p className="font-medium">{!own.length ? "ยังไม่มีเรื่องแจ้งซ่อม" : query ? "ไม่พบเรื่องที่ตรงกับการค้นหา" : "ยังไม่มีเรื่องในสถานะนี้"}</p><p className="mt-2 text-sm text-muted">{!own.length ? "เริ่มแจ้งปัญหาที่พบ แล้วติดตามการแก้ไขได้ที่นี่" : "ลองเลือกสถานะอื่นหรือเปลี่ยนคำค้นหา"}</p>{own.length ? <button type="button" onClick={clearFilters} className={`mt-5 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium ${focusClass}`}>ดูเรื่องทั้งหมด</button> : <Link href="/user/report" className={`mt-5 inline-block rounded-lg bg-primary px-4 py-2.5 text-sm font-medium ${focusClass}`}>แจ้งปัญหาใหม่</Link>}</div>}</div>
+      {visible.length < filtered.length && <button type="button" onClick={() => setVisibleCount(count => count + 6)} aria-controls="my-ticket-list" className={`min-h-12 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm font-medium transition hover:border-primary hover:bg-primary/5 ${focusClass}`}>แสดงเพิ่มเติม ({filtered.length - visible.length} เรื่อง)</button>}
     </section>
   </div>;
 }

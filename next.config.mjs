@@ -1,6 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
   experimental: { serverActions: { bodySizeLimit: "3mb" } },
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "Permissions-Policy", value: "microphone=(), payment=(), usb=()" },
+        // Leave scripts, styles and connections to Next.js/Motion/Supabase unchanged.
+        { key: "Content-Security-Policy", value: "base-uri 'self'; object-src 'none'; frame-ancestors 'none'" },
+      ],
+    }];
+  },
   async redirects() {
     return [
       { source: "/", destination: "/user", permanent: false },

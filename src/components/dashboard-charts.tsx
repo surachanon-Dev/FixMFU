@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useRef, useState } from "react";
 import { MONTH_LABELS, type DashboardMonth } from "../lib/dashboard";
 import { STATUS_LABELS, type TicketStatus } from "../lib/tickets";
 
@@ -14,13 +14,15 @@ export function SegmentMeter({ value, total }: { value: number; total: number })
 
 export function MonthlyTicketChart({ rows, year, selectedMonth, onSelect }: { rows: DashboardMonth[]; year: number; selectedMonth: number | null; onSelect: (month: number) => void }) {
   const id = useId();
+  const monthButtons = useRef<(SVGGElement | null)[]>([]);
+  const [focusMonth, setFocusMonth] = useState(selectedMonth ?? 0);
   const maximum = Math.max(4, Math.ceil(Math.max(...rows.map(row => row.total)) / 4) * 4);
   const baseline = 210;
   const scale = (value: number) => value / maximum * 176;
   return <>
     <div className="overflow-x-auto pb-1">
       <svg viewBox="0 0 660 256" className="w-full min-w-[640px]" role="group" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`}>
-        <title id={`${id}-title`}>จำนวนเรื่องแจ้งรายเดือน ปี {year + 543}</title><desc id={`${id}-description`}>สีส้มคือเรื่องที่มีสถานะเสร็จสิ้น ลายเส้นคือสถานะอื่น กดเดือนหรือใช้ Enter และ Space เพื่อเลือกช่วงสรุป</desc>
+        <title id={`${id}-title`}>{`จำนวนเรื่องแจ้งรายเดือน ปี ${year + 543}`}</title><desc id={`${id}-description`}>สีส้มคือเรื่องที่มีสถานะเสร็จสิ้น ลายเส้นคือสถานะอื่น ใช้ลูกศรซ้ายขวา Home หรือ End เพื่อเลื่อนเดือน แล้วกด Enter หรือ Space เพื่อเลือกช่วงสรุป กดเดือนเดิมซ้ำเพื่อดูทั้งปี</desc>
         <defs><pattern id={`${id}-stripe`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" className="fill-primary/10" /><line x1="0" x2="0" y1="0" y2="5" className="stroke-primary/40" strokeWidth="1.5" /></pattern></defs>
         {Array.from({ length: 5 }, (_, index) => {
           const value = maximum / 4 * index;
@@ -33,7 +35,11 @@ export function MonthlyTicketChart({ rows, year, selectedMonth, onSelect }: { ro
           const otherHeight = scale(row.total - row.completed);
           const active = selectedMonth === index;
           const label = `${MONTH_LABELS[index]} ${year + 543}: ทั้งหมด ${row.total} เรื่อง เสร็จสิ้น ${row.completed} เรื่อง`;
-          return <g key={index} role="button" tabIndex={0} aria-label={label} aria-pressed={active} className="group cursor-pointer outline-none" onClick={() => onSelect(index)} onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(index); } }}>
+          return <g key={index} ref={node => { monthButtons.current[index] = node; }} role="button" tabIndex={focusMonth === index ? 0 : -1} aria-label={label} aria-pressed={active} className="group cursor-pointer outline-none" onFocus={() => setFocusMonth(index)} onClick={() => { setFocusMonth(index); onSelect(index); }} onKeyDown={event => {
+            if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(index); }
+            const next = event.key === "ArrowRight" ? (index + 1) % rows.length : event.key === "ArrowLeft" ? (index + rows.length - 1) % rows.length : event.key === "Home" ? 0 : event.key === "End" ? rows.length - 1 : null;
+            if (next !== null) { event.preventDefault(); monthButtons.current[next]?.focus(); }
+          }}>
             <title>{label}</title><rect x={x - 4} y={18} width="48" height="223" rx="8" className={active ? "fill-primary/10" : "fill-background opacity-0 group-hover:opacity-100"} /><rect x={x - 4} y={18} width="48" height="223" rx="8" fill="none" className="stroke-primary opacity-0 group-focus-visible:opacity-100" strokeWidth="2" />
             {otherHeight > 0 && <rect x={x} y={baseline - completedHeight - otherHeight} width="39" height={otherHeight} rx="4" fill={`url(#${id}-stripe)`} />}{completedHeight > 0 && <rect x={x} y={baseline - completedHeight} width="39" height={completedHeight} rx="4" className="fill-primary" />}
             {row.total > 0 && <text x={x + 19.5} y={baseline - scale(row.total) - 8} textAnchor="middle" className="fill-ink text-lg font-medium" aria-hidden="true">{row.total}</text>}<text x={x + 19.5} y="233" textAnchor="middle" className={`${active ? "fill-ink font-semibold" : "fill-muted"} text-sm`} aria-hidden="true">{MONTH_LABELS[index]}</text>
